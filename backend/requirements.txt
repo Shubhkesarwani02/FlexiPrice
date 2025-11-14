@@ -7,6 +7,7 @@ sqlalchemy==2.0.23
 alembic==1.12.1
 asyncpg==0.29.0
 psycopg2-binary==2.9.9
+prisma==0.11.0
 
 # Validation & Config
 pydantic==2.5.0
