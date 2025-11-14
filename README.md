@@ -83,14 +83,46 @@ FlexiPrice/
    uvicorn app.main:app --reload
    ```
 
+## 📚 API Documentation
+
+Once the server is running, visit:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### Available Endpoints
+
+#### Products (`/api/v1/admin/products`)
+- `POST /api/v1/admin/products` - Create product
+- `GET /api/v1/admin/products` - List products
+- `GET /api/v1/admin/products/with-discounts` - Products with discount info
+- `GET /api/v1/admin/products/{id}` - Get product by ID
+- `PUT /api/v1/admin/products/{id}` - Update product
+- `DELETE /api/v1/admin/products/{id}` - Delete product
+
+#### Inventory (`/api/v1/admin/inventory`)
+- `POST /api/v1/admin/inventory` - Add inventory batch
+- `GET /api/v1/admin/inventory` - List batches
+- `GET /api/v1/admin/inventory/expiring` - Get expiring batches
+- `GET /api/v1/admin/inventory/product/{id}` - Get product batches
+- `PUT /api/v1/admin/inventory/{id}` - Update batch
+- `DELETE /api/v1/admin/inventory/{id}` - Delete batch
+
+### Quick Test
+```bash
+# Run automated API tests
+./scripts/test_api.sh
+```
+
 ## 📋 Week 1 Goals
 
 - [x] FastAPI skeleton with health check
 - [x] Docker setup with Postgres & Redis
-- [ ] Database schema & models
-- [ ] Product & inventory endpoints
+- [x] Database schema & models (Prisma + SQLAlchemy)
+- [x] Product & inventory endpoints
+- [x] Admin CRUD APIs with service layer
+- [ ] Discount calculation engine
+- [ ] Celery scheduler setup
 - [ ] Basic tests
-- [ ] Alembic migrations
 
 ## 📝 License
 

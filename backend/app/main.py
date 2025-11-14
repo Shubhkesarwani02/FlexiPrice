@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.core.config import get_settings
 from app.core.database import connect_db, disconnect_db
+from app.api.v1.api import api_router
 
 settings = get_settings()
 
@@ -33,6 +34,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include API router
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/health")
