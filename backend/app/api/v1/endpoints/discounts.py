@@ -140,3 +140,93 @@ async def get_discount_history(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve discount history: {str(e)}"
         )
+
+
+@router.post(
+    "/trigger-recompute",
+    summary="Manually trigger discount recomputation",
+)
+async def trigger_discount_recompute(
+    days_threshold: int = Query(30, ge=1, le=365, description="Process batches expiring within N days"),
+    async_task: bool = Query(True, description="Run as background task"),
+):
+    """
+    Manually trigger discount recomputation for all eligible batches.
+    
+    This endpoint allows manual triggering of the discount calculation process
+    that normally runs on a schedule.
+    
+    - **days_threshold**: Only process batches expiring within this many days
+    - **async_task**: If true, run as Celery background task; if false, run synchronously
+    
+    Returns task ID if async, or results if synchronous.
+    """
+    try:
+        if async_task:
+            # Import here to avoid circular dependencies
+            from app.tasks import recompute_all_discounts
+            
+            # Queue the task
+            task = recompute_all_discounts.delay(days_threshold=days_threshold)
+            
+            return {
+                "status": "queued",
+                "task_id": task.id,
+                "message": f"Discount recomputation queued for batches expiring within {days_threshold} days"
+            }
+        else:
+            # Run synchronously (for testing/small datasets)
+            result = await DiscountService.compute_all_batch_discounts(
+                expiring_only=True,
+                days_threshold=days_threshold
+            )
+            
+            return {
+                "status": "completed",
+                "results": result,
+                "message": "Discount recomputation completed"
+            }
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to trigger recomputation: {str(e)}"
+        )
+
+
+@router.get(
+    "/task-status/{task_id}",
+    summary="Check status of background task",
+)
+async def get_task_status(task_id: str):
+    """
+    Check the status of a background discount computation task.
+    
+    - **task_id**: The Celery task ID returned by trigger-recompute
+    """
+    try:
+        from app.celery_app import celery_app
+        
+        task = celery_app.AsyncResult(task_id)
+        
+        response = {
+            "task_id": task_id,
+            "status": task.state,
+            "ready": task.ready(),
+        }
+        
+        if task.ready():
+            if task.successful():
+                response["result"] = task.result
+            else:
+                response["error"] = str(task.info)
+        else:
+            response["info"] = str(task.info) if task.info else None
+        
+        return response
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check task status: {str(e)}"
+        )

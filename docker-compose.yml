@@ -47,6 +47,8 @@ services:
       DATABASE_URL: postgresql://flexiprice:flexiprice_dev_password@postgres:5432/flexiprice_db
       # Redis
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
       # App
       ENV: development
       DEBUG: "true"
@@ -58,6 +60,54 @@ services:
       redis:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flexiprice-celery-worker
+    environment:
+      # Database
+      DATABASE_URL: postgresql://flexiprice:flexiprice_dev_password@postgres:5432/flexiprice_db
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      # App
+      ENV: development
+      DEBUG: "true"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A app.celery_app worker --loglevel=info --concurrency=2
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flexiprice-celery-beat
+    environment:
+      # Database
+      DATABASE_URL: postgresql://flexiprice:flexiprice_dev_password@postgres:5432/flexiprice_db
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      # App
+      ENV: development
+      DEBUG: "true"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: celery -A app.celery_app beat --loglevel=info
 
 volumes:
   postgres_data:
