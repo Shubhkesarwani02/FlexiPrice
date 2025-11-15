@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import products, inventory, discounts, ml_admin, analytics
+from app.api.v1.endpoints import products, inventory, discounts, ml_admin, analytics, experiments, experiment_analytics
 
 api_router = APIRouter()
 
@@ -32,4 +32,16 @@ api_router.include_router(
     analytics.router,
     prefix="/admin/analytics",
     tags=["admin-analytics"]
+)
+
+api_router.include_router(
+    experiments.router,
+    prefix="/admin/experiments",
+    tags=["admin-experiments"]
+)
+
+api_router.include_router(
+    experiment_analytics.router,
+    prefix="/admin/experiments/analytics",
+    tags=["admin-experiment-analytics"]
 )

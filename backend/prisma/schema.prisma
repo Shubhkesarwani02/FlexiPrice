@@ -23,10 +23,15 @@ model Product {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  // A/B Testing Fields
+  experimentGroup    ExperimentGroup? @default(CONTROL) @map("experiment_group")
+  experimentAssignedAt DateTime?      @map("experiment_assigned_at")
+  
   // Relations
   inventoryBatches InventoryBatch[]
   priceHistory     PriceHistory[]
   orderItems       OrderItem[]
+  experimentMetrics ExperimentMetric[]
 
   @@map("products")
 }
@@ -117,4 +122,37 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum ExperimentGroup {
+  CONTROL      // Rule-based discounts
+  ML_VARIANT   // ML-recommended discounts
+}
+
+// Track A/B experiment metrics per product
+model ExperimentMetric {
+  id                 Int      @id @default(autoincrement())
+  productId          Int      @map("product_id")
+  experimentGroup    ExperimentGroup @map("experiment_group")
+  
+  // Metrics
+  impressions        Int      @default(0)  // Views
+  conversions        Int      @default(0)  // Purchases
+  revenue            Decimal  @default(0) @db.Decimal(12, 2)
+  unitsSold          Int      @default(0) @map("units_sold")
+  avgDiscountPct     Decimal? @map("avg_discount_pct") @db.Decimal(5, 2)
+  
+  // Time tracking
+  periodStart        DateTime @map("period_start")
+  periodEnd          DateTime @map("period_end")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, experimentGroup, periodStart])
+  @@index([experimentGroup])
+  @@index([periodStart, periodEnd])
+  @@map("experiment_metrics")
 }
