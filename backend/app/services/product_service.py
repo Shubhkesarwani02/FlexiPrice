@@ -8,7 +8,9 @@ from app.schemas.product import (
     ProductUpdate,
     ProductResponse,
     ProductWithDiscountResponse,
+    ProductWithStorefrontPriceResponse,
 )
+from app.services.batch_discount_service import BatchDiscountService
 
 
 class ProductService:
@@ -62,6 +64,53 @@ class ProductService:
             order={"createdAt": "desc"},
         )
         return [ProductResponse.model_validate(p) for p in products]
+
+    @staticmethod
+    async def get_all_products_with_storefront_price(
+        skip: int = 0,
+        limit: int = 100,
+        category: Optional[str] = None,
+    ) -> List[ProductWithStorefrontPriceResponse]:
+        """
+        Get all products with computed storefront prices.
+        
+        Storefront price = min(computed_price) from active batches or base price.
+        """
+        where_clause = {}
+        if category:
+            where_clause["category"] = category
+
+        products = await prisma.product.find_many(
+            where=where_clause,
+            skip=skip,
+            take=limit,
+            order={"createdAt": "desc"},
+        )
+        
+        if not products:
+            return []
+        
+        # Get storefront prices for all products
+        product_ids = [p.id for p in products]
+        storefront_prices = await BatchDiscountService.get_storefront_prices(product_ids)
+        
+        result = []
+        for product in products:
+            product_dict = product.model_dump()
+            price, discount = storefront_prices.get(
+                product.id, 
+                (product.basePrice, None)
+            )
+            
+            result.append(
+                ProductWithStorefrontPriceResponse(
+                    **product_dict,
+                    storefront_price=price,
+                    discount_pct=discount
+                )
+            )
+        
+        return result
 
     @staticmethod
     async def get_products_with_discounts(

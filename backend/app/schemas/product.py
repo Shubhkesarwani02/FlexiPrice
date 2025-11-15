@@ -38,6 +38,12 @@ class ProductResponse(ProductBase):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
+class ProductWithStorefrontPriceResponse(ProductResponse):
+    """Schema for product response with computed storefront price."""
+    storefront_price: Decimal = Field(..., description="Best available price from active batches or base price")
+    discount_pct: Optional[Decimal] = Field(None, description="Applied discount percentage if any")
+
+
 class ProductWithDiscountResponse(ProductResponse):
     """Schema for product response with current discount."""
     current_discount_pct: Optional[Decimal] = Field(None, description="Current discount percentage")

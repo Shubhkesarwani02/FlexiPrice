@@ -28,8 +28,13 @@ celery_app.conf.update(
     task_track_started=True,
     task_time_limit=30 * 60,  # 30 minutes
     task_soft_time_limit=25 * 60,  # 25 minutes
-    worker_prefetch_multiplier=4,
-    worker_max_tasks_per_child=1000,
+    worker_prefetch_multiplier=4,  # Number of tasks to prefetch per worker
+    worker_max_tasks_per_child=1000,  # Restart worker after 1000 tasks (prevent memory leaks)
+    worker_concurrency=8,  # Number of concurrent worker processes (adjust based on CPU cores)
+    task_acks_late=True,  # Acknowledge tasks after completion (safer for failures)
+    task_reject_on_worker_lost=True,  # Reject tasks if worker dies
+    result_expires=3600,  # Results expire after 1 hour
+    task_compression="gzip",  # Compress task messages for network efficiency
 )
 
 # Celery Beat Schedule - Periodic Tasks
@@ -57,6 +62,15 @@ celery_app.conf.beat_schedule = {
 # Optional: Custom task routes
 celery_app.conf.task_routes = {
     "app.tasks.recompute_all_discounts": {"queue": "discounts"},
+    "app.tasks.recompute_batch_chunk": {"queue": "discounts"},  # Parallel chunk processing
+    "app.tasks.parallel_recompute_discounts": {"queue": "discounts"},
     "app.tasks.cleanup_expired_discounts": {"queue": "maintenance"},
     "app.tasks.update_price_history": {"queue": "analytics"},
+}
+
+# Task priority configuration (0-9, higher = more priority)
+celery_app.conf.task_default_priority = 5
+celery_app.conf.broker_transport_options = {
+    "priority_steps": [0, 3, 6, 9],  # Support for priority levels
+    "queue_order_strategy": "priority",  # Process higher priority tasks first
 }

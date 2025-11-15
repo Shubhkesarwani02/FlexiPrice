@@ -7,6 +7,7 @@ from app.schemas.product import (
     ProductUpdate,
     ProductResponse,
     ProductWithDiscountResponse,
+    ProductWithStorefrontPriceResponse,
 )
 from app.services.product_service import ProductService
 
@@ -45,8 +46,8 @@ async def create_product(product: ProductCreate):
 
 @router.get(
     "",
-    response_model=List[ProductResponse],
-    summary="List all products",
+    response_model=List[ProductWithStorefrontPriceResponse],
+    summary="List all products with storefront prices",
 )
 async def list_products(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -54,14 +55,17 @@ async def list_products(
     category: Optional[str] = Query(None, description="Filter by category"),
 ):
     """
-    Retrieve a list of all products with optional pagination and filtering.
+    Retrieve a list of all products with computed storefront prices.
+    
+    Storefront price is the minimum computed_price from active batches,
+    or base price if no active discounts exist.
     
     - **skip**: Number of records to skip (for pagination)
     - **limit**: Maximum number of records to return
     - **category**: Filter products by category (optional)
     """
     try:
-        return await ProductService.get_all_products(
+        return await ProductService.get_all_products_with_storefront_price(
             skip=skip, limit=limit, category=category
         )
     except Exception as e:

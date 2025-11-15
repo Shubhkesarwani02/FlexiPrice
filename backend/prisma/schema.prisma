@@ -54,12 +54,15 @@ model BatchDiscount {
   discountPct   Decimal   @map("discount_pct") @db.Decimal(5, 2)
   validFrom     DateTime  @default(now()) @map("valid_from")
   validTo       DateTime? @map("valid_to")
+  expiresAt     DateTime? @map("expires_at")
   createdAt     DateTime  @default(now()) @map("created_at")
   mlRecommended Boolean   @default(false) @map("ml_recommended")
 
   // Relations
   batch InventoryBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
 
+  @@index([batchId, validFrom, validTo])
+  @@index([expiresAt])
   @@map("batch_discounts")
 }
 
