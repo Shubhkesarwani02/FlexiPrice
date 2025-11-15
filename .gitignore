@@ -54,11 +54,18 @@ htmlcov/
 .pytest_cache/
 .tox/
 
-# ML Models
+# ML Models & Data
 *.pkl
 *.joblib
 models/*.h5
 models/*.pb
+
+# Synthetic/Training Data
+backend/data/*.csv
+backend/data/*.json
+backend/data/*.parquet
+backend/data/synthetic_*
+!backend/data/README.md
 
 # Node (for frontend)
 node_modules/
