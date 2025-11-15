@@ -1,0 +1,107 @@
+# Discount Rules Configuration
+# Rule-based discount engine for expiry-based pricing
+
+# Default Settings
+defaults:
+  min_discount: 0.05        # Minimum discount (5%)
+  max_discount: 0.80       # Maximum discount (80%)
+  default_price_floor: 0.30     # Default minimum price as % of base price (30%)
+
+# Discount Rules
+# Rules are evaluated by priority - lower number = higher priority
+rules:
+  # Critical expiry - Very aggressive discount
+  - name: "Critical Expiry"
+    condition:
+      days_to_expiry:
+        lte: 2
+    discount: 0.60            # 60% discount
+    priority: 1
+
+  # High urgency - Strong discount
+  - name: "High Urgency"
+    condition:
+      days_to_expiry:
+        gt: 2
+        lte: 7
+    discount: 0.40            # 40% discount
+    priority: 2
+
+  # Medium urgency - Moderate discount
+  - name: "Medium Urgency"
+    condition:
+      days_to_expiry:
+        gt: 7
+        lte: 14
+    discount: 0.25            # 25% discount
+    priority: 3
+
+  # Low urgency - Light discount
+  - name: "Low Urgency"
+    condition:
+      days_to_expiry:
+        gt: 14
+        lte: 30
+    discount: 0.15            # 15% discount
+    priority: 4
+
+  # Critical overstock - Combined urgency
+  - name: "Critical Overstock"
+    condition:
+      days_to_expiry:
+        lte: 7
+      quantity:
+        gt: 50
+    discount: 0.50            # 50% discount
+    priority: 5
+
+  # Overstocked - Inventory-based discount
+  - name: "Overstocked"
+    condition:
+      days_to_expiry:
+        gt: 7
+        lte: 30
+      quantity:
+        gt: 100
+    discount: 0.20            # 20% discount
+    priority: 6
+
+# Category-specific overrides
+category_overrides:
+  dairy:
+    price_floor: 0.30
+    rules:
+      - name: "Dairy Critical"
+        condition:
+          days_to_expiry:
+            lte: 3
+        discount: 0.50
+        priority: 1
+
+  bakery:
+    price_floor: 0.20
+    rules:
+      - name: "Bakery Same Day"
+        condition:
+          days_to_expiry:
+            lte: 1
+        discount: 0.70
+        priority: 1
+      
+      - name: "Bakery Fresh"
+        condition:
+          days_to_expiry:
+            gt: 1
+            lte: 3
+        discount: 0.50
+        priority: 2
+
+  produce:
+    price_floor: 0.35
+    rules:
+      - name: "Produce Aging"
+        condition:
+          days_to_expiry:
+            lte: 5
+        discount: 0.45
+        priority: 1

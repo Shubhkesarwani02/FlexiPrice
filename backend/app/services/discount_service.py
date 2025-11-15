@@ -56,15 +56,20 @@ class DiscountService:
         # Get discount engine
         engine = get_discount_engine()
         
+        # Convert datetime to date if needed
+        expiry_date = batch.expiryDate
+        if isinstance(expiry_date, datetime):
+            expiry_date = expiry_date.date()
+        
         # Compute discount
         computed_price, discount_pct, reason = engine.compute_batch_price(
             base_price=batch.product.basePrice,
-            expiry_date=batch.expiryDate,
+            expiry_date=expiry_date,
             quantity=batch.quantity,
             category=batch.product.category
         )
         
-        days_to_expiry = (batch.expiryDate - date.today()).days
+        days_to_expiry = (expiry_date - date.today()).days
         
         # Create discount record
         discount = await prisma.batchdiscount.create(
@@ -230,15 +235,20 @@ class DiscountService:
         if not batch or not batch.product:
             raise ValueError(f"Batch {batch_id} not found")
         
+        # Convert datetime to date if needed
+        expiry_date = batch.expiryDate
+        if isinstance(expiry_date, datetime):
+            expiry_date = expiry_date.date()
+        
         engine = get_discount_engine()
         computed_price, discount_pct, reason = engine.compute_batch_price(
             base_price=batch.product.basePrice,
-            expiry_date=batch.expiryDate,
+            expiry_date=expiry_date,
             quantity=batch.quantity,
             category=batch.product.category
         )
         
-        days_to_expiry = (batch.expiryDate - date.today()).days
+        days_to_expiry = (expiry_date - date.today()).days
         
         return DiscountCalculationResponse(
             batch_id=batch_id,
