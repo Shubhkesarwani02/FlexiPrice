@@ -3,10 +3,16 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
+# Convert SQLAlchemy URL to Prisma-compatible URL
+def get_prisma_url(url: str) -> str:
+    """Convert SQLAlchemy database URL to Prisma-compatible format."""
+    # Remove SQLAlchemy-specific driver suffix (e.g., +asyncpg)
+    return url.replace("+asyncpg", "").replace("+psycopg2", "")
+
 # Global Prisma client instance
 prisma = Prisma(
     datasource={
-        "url": settings.DATABASE_URL
+        "url": get_prisma_url(settings.DATABASE_URL)
     }
 )
 
