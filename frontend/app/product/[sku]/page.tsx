@@ -34,17 +34,17 @@ export default function ProductDetailPage() {
 
   if (productLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen fp-shell">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
+            <div className="h-8 bg-white/10 rounded w-1/4 mb-8" />
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="aspect-square bg-gray-200 rounded-lg" />
+              <div className="aspect-square bg-white/10 rounded-lg" />
               <div className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-12 bg-gray-200 rounded w-1/2" />
-                <div className="h-24 bg-gray-200 rounded" />
+                <div className="h-8 bg-white/10 rounded w-3/4" />
+                <div className="h-4 bg-white/10 rounded w-1/4" />
+                <div className="h-12 bg-white/10 rounded w-1/2" />
+                <div className="h-24 bg-white/10 rounded" />
               </div>
             </div>
           </div>
@@ -55,11 +55,11 @@ export default function ProductDetailPage() {
 
   if (productError || !product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen fp-shell">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
-            <p className="text-red-600 mb-4">Product not found</p>
-            <Link href="/" className="text-blue-600 hover:underline">
+            <p className="text-[var(--danger)] text-xs tracking-[0.12em] uppercase mb-4">Product not found</p>
+            <Link href="/" className="text-[var(--accent-subtle)] text-xs tracking-[0.12em] uppercase hover:text-[var(--accent)]">
               ← Back to products
             </Link>
           </div>
@@ -82,10 +82,10 @@ export default function ProductDetailPage() {
   const inStock = inventory && inventory.quantity > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen fp-shell">
+      <header className="fp-shell-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/" className="text-blue-600 hover:underline flex items-center gap-2">
+          <Link href="/" className="text-[var(--accent-subtle)] hover:text-[var(--accent)] flex items-center gap-2 text-xs tracking-[0.12em] uppercase">
             <span>←</span> Back to products
           </Link>
         </div>
@@ -94,16 +94,16 @@ export default function ProductDetailPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Product Image */}
-          <div className="aspect-square bg-white rounded-lg shadow-sm flex items-center justify-center">
-            <span className="text-gray-300 text-9xl">📦</span>
+          <div className="aspect-square fp-panel flex items-center justify-center border border-[var(--border-subtle)]">
+            <span className="text-[var(--foreground-muted)] text-9xl">📦</span>
           </div>
 
           {/* Product Details */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
+          <div className="fp-panel p-6">
+            <h1 className="text-2xl font-bold text-[var(--accent-subtle)] tracking-[0.12em] uppercase mb-2">{product.name}</h1>
             
             {product.category && (
-              <p className="text-sm text-gray-500 mb-4 uppercase tracking-wide">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-4 uppercase tracking-[0.16em]">
                 {product.category}
               </p>
             )}
@@ -112,19 +112,19 @@ export default function ProductDetailPage() {
               {activeDiscounts.length > 0 ? (
                 <>
                   <div className="flex items-baseline gap-3 mb-2">
-                    <span className="text-4xl font-bold text-green-600">
+                    <span className="text-3xl font-bold text-[var(--accent-subtle)] fp-card-price">
                       ${finalPrice.toFixed(2)}
                     </span>
-                    <span className="text-xl text-gray-500 line-through">
+                    <span className="text-lg text-[var(--foreground-muted)] line-through fp-card-price">
                       ${product.base_price.toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-green-600 font-medium">
+                  <p className="text-xs text-[var(--accent-subtle)] font-medium tracking-[0.12em] uppercase">
                     Save ${totalDiscount.toFixed(2)} ({((totalDiscount / product.base_price) * 100).toFixed(0)}% off)
                   </p>
                 </>
               ) : (
-                <span className="text-4xl font-bold text-gray-900">
+                <span className="text-3xl font-bold text-[var(--accent-subtle)] fp-card-price">
                   ${product.base_price.toFixed(2)}
                 </span>
               )}
@@ -134,14 +134,14 @@ export default function ProductDetailPage() {
             {inventory && (
               <div className="mb-6">
                 {inStock ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <span className="w-2 h-2 bg-green-600 rounded-full" />
-                    <span className="font-medium">In Stock ({inventory.quantity} available)</span>
+                  <div className="flex items-center gap-2 text-[var(--accent-subtle)]">
+                    <span className="w-2 h-2 bg-[var(--accent-subtle)] rounded-full" />
+                    <span className="text-[10px] font-medium tracking-[0.12em] uppercase">In Stock ({inventory.quantity} available)</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <span className="w-2 h-2 bg-red-600 rounded-full" />
-                    <span className="font-medium">Out of Stock</span>
+                  <div className="flex items-center gap-2 text-[var(--danger)]">
+                    <span className="w-2 h-2 bg-[var(--danger)] rounded-full" />
+                    <span className="text-[10px] font-medium tracking-[0.12em] uppercase">Out of Stock</span>
                   </div>
                 )}
               </div>
@@ -150,23 +150,23 @@ export default function ProductDetailPage() {
             {/* Description */}
             {product.description && (
               <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-2">Description</h2>
-                <p className="text-gray-600">{product.description}</p>
+                <h2 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-2">Description</h2>
+                <p className="text-xs text-[var(--foreground)]">{product.description}</p>
               </div>
             )}
 
             {/* Product Details */}
-            <div className="border-t pt-6 mb-6">
-              <h2 className="text-lg font-semibold mb-3">Product Details</h2>
-              <dl className="space-y-2 text-sm">
+            <div className="border-t border-[var(--border-subtle)] pt-6 mb-6">
+              <h2 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-3">Product Details</h2>
+              <dl className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <dt className="text-gray-600">SKU:</dt>
-                  <dd className="font-medium">{product.sku}</dd>
+                  <dt className="text-[var(--foreground-muted)] tracking-[0.12em] uppercase">SKU:</dt>
+                  <dd className="font-medium text-[var(--accent-subtle)] fp-card-price">{product.sku}</dd>
                 </div>
                 {product.category && (
                   <div className="flex justify-between">
-                    <dt className="text-gray-600">Category:</dt>
-                    <dd className="font-medium">{product.category}</dd>
+                    <dt className="text-[var(--foreground-muted)] tracking-[0.12em] uppercase">Category:</dt>
+                    <dd className="font-medium text-[var(--accent-subtle)]">{product.category}</dd>
                   </div>
                 )}
               </dl>
@@ -174,30 +174,30 @@ export default function ProductDetailPage() {
 
             {/* Active Discounts */}
             {activeDiscounts.length > 0 && (
-              <div className="border-t pt-6">
-                <h2 className="text-lg font-semibold mb-3">Active Discounts</h2>
+              <div className="border-t border-[var(--border-subtle)] pt-6">
+                <h2 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-3">Active Discounts</h2>
                 <div className="space-y-2">
                   {activeDiscounts.map((discount, idx) => (
-                    <div key={idx} className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div key={idx} className="bg-white/5 border border-[var(--border-subtle)] rounded-lg p-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-medium text-green-900">
+                          <p className="text-xs font-medium text-[var(--accent-subtle)] tracking-[0.12em] uppercase">
                             {discount.discount_type === 'percentage' 
                               ? `${discount.value}% off` 
                               : `$${discount.value} off`}
                           </p>
                           {discount.min_quantity && (
-                            <p className="text-xs text-green-700">
+                            <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.12em] uppercase">
                               Min. quantity: {discount.min_quantity}
                             </p>
                           )}
                         </div>
-                        <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
+                        <span className="text-[10px] bg-white/10 text-[var(--foreground-muted)] px-2 py-1 rounded tracking-[0.12em] uppercase">
                           Priority: {discount.priority}
                         </span>
                       </div>
                       {discount.end_date && (
-                        <p className="text-xs text-green-600 mt-1">
+                        <p className="text-[10px] text-[var(--foreground-muted)] mt-1 tracking-[0.12em] uppercase">
                           Valid until: {new Date(discount.end_date).toLocaleDateString()}
                         </p>
                       )}

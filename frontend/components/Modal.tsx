@@ -36,7 +36,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -44,15 +44,17 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           ref={modalRef}
-          className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 transform transition-all"
+          className="relative fp-panel w-full max-w-2xl p-6 transform transition-all bg-[#050505] border border-[var(--border-strong)]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+            <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)]">
+              {title}
+            </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-[var(--foreground-muted)] hover:text-[var(--accent-subtle)] transition-colors"
             >
               <svg
                 className="w-6 h-6"
@@ -69,7 +71,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           </div>
 
           {/* Content */}
-          <div>{children}</div>
+          <div className="text-[var(--foreground)] text-sm">{children}</div>
         </div>
       </div>
     </div>

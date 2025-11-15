@@ -126,20 +126,20 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 text-sm">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+        <div className="border border-[var(--danger)] text-[var(--danger)] px-4 py-3 rounded-md bg-black/40 text-xs">
           {error}
         </div>
       )}
 
       {/* Product Selection */}
       <div>
-        <label htmlFor="productId" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="productId" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Product <span className="text-red-500">*</span>
         </label>
         {loadingProducts ? (
-          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+          <div className="w-full px-3 py-2 bg-black/40 border border-[var(--border-subtle)] rounded-md fp-card-price text-[var(--foreground-muted)]">
             Loading products...
           </div>
         ) : (
@@ -148,8 +148,8 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
             name="productId"
             value={formData.productId}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.productId ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+              errors.productId ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
             }`}
           >
             <option value="">Select a product</option>
@@ -160,12 +160,12 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
             ))}
           </select>
         )}
-        {errors.productId && <p className="text-red-500 text-sm mt-1">{errors.productId}</p>}
+        {errors.productId && <p className="text-[var(--danger)] text-xs mt-1">{errors.productId}</p>}
       </div>
 
       {/* Batch Code */}
       <div>
-        <label htmlFor="batchCode" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="batchCode" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Batch Code
         </label>
         <input
@@ -174,18 +174,20 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
           name="batchCode"
           value={formData.batchCode}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.batchCode ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.batchCode ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., BATCH-2024-001"
         />
-        {errors.batchCode && <p className="text-red-500 text-sm mt-1">{errors.batchCode}</p>}
-        <p className="text-gray-500 text-xs mt-1">Optional batch identification code</p>
+        {errors.batchCode && <p className="text-[var(--danger)] text-xs mt-1">{errors.batchCode}</p>}
+        <p className="text-[var(--foreground-muted)] text-[10px] mt-1 tracking-[0.12em] uppercase">
+          Optional batch identification code
+        </p>
       </div>
 
       {/* Quantity */}
       <div>
-        <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="quantity" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Quantity <span className="text-red-500">*</span>
         </label>
         <input
@@ -196,17 +198,17 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
           onChange={handleChange}
           min="1"
           step="1"
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.quantity ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.quantity ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., 100"
         />
-        {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
+        {errors.quantity && <p className="text-[var(--danger)] text-xs mt-1">{errors.quantity}</p>}
       </div>
 
       {/* Expiry Date */}
       <div>
-        <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="expiryDate" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Expiry Date <span className="text-red-500">*</span>
         </label>
         <input
@@ -216,20 +218,22 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
           value={formData.expiryDate}
           onChange={handleChange}
           min={getMinDate()}
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.expiryDate ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.expiryDate ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
         />
-        {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
-        <p className="text-gray-500 text-xs mt-1">Date when this batch expires</p>
+        {errors.expiryDate && <p className="text-[var(--danger)] text-xs mt-1">{errors.expiryDate}</p>}
+        <p className="text-[var(--foreground-muted)] text-[10px] mt-1 tracking-[0.12em] uppercase">
+          Date when this batch expires
+        </p>
       </div>
 
       {/* Form Actions */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-4 text-xs">
         <button
           type="submit"
           disabled={isSubmitting || loadingProducts}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+          className="flex-1 fp-pill-button justify-center disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Creating...' : 'Add Inventory Batch'}
         </button>
@@ -237,7 +241,7 @@ export default function InventoryForm({ onSuccess, onCancel }: InventoryFormProp
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 disabled:bg-gray-100 transition-colors font-medium"
+          className="flex-1 border border-[var(--border-subtle)] rounded-full py-2 px-4 text-[var(--foreground-muted)] hover:border-[var(--accent-subtle)] hover:text-[var(--accent)] transition-colors"
         >
           Cancel
         </button>

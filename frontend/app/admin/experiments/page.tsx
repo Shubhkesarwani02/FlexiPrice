@@ -115,11 +115,11 @@ export default function ExperimentsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen fp-shell p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">A/B Experiments</h1>
+          <h1 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-8">A/B Experiments</h1>
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent-subtle)]"></div>
           </div>
         </div>
       </div>
@@ -128,15 +128,15 @@ export default function ExperimentsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen fp-shell p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">A/B Experiments</h1>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-800 mb-2">Error</h2>
-            <p className="text-red-600">{error}</p>
+          <h1 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-8">A/B Experiments</h1>
+          <div className="fp-panel p-6 border border-[var(--danger)]">
+            <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--danger)] mb-2">Error</h2>
+            <p className="text-xs text-[var(--foreground-muted)] mb-4">{error}</p>
             <button
               onClick={loadExperimentData}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="fp-pill-button text-[10px] border-[var(--danger)]"
             >
               Retry
             </button>
@@ -147,24 +147,24 @@ export default function ExperimentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen fp-shell p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">A/B Experiments</h1>
-            <p className="text-gray-600">Compare ML vs Rule-Based Discount Recommendations</p>
+            <h1 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-2">A/B Experiments</h1>
+            <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.12em] uppercase">Compare ML vs Rule-Based Discount Recommendations</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={handleAssignRandom}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="fp-pill-button text-[10px]"
             >
               Assign Random (50/50)
             </button>
             <button
               onClick={handleReset}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+              className="fp-pill-button text-[10px] border-[var(--foreground-muted)]"
             >
               Reset Experiments
             </button>
@@ -172,14 +172,14 @@ export default function ExperimentsPage() {
         </div>
 
         {/* Time Period Selector */}
-        <div className="mb-6 bg-white rounded-lg shadow p-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="mb-6 fp-panel p-4">
+          <label className="block text-[10px] font-medium text-[var(--foreground-muted)] tracking-[0.16em] uppercase mb-2">
             Analysis Period
           </label>
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg"
+            className="px-4 py-2 bg-black/40 border border-[var(--border-subtle)] text-[var(--foreground)] text-xs rounded"
           >
             <option value={1}>Last 24 hours</option>
             <option value={7}>Last 7 days</option>
@@ -191,60 +191,56 @@ export default function ExperimentsPage() {
         {/* Status Cards */}
         {status && (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600 mb-1">Total Products</p>
-              <p className="text-2xl font-bold text-gray-900">{status.totalProducts}</p>
+            <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-1 tracking-[0.16em] uppercase">Total Products</p>
+              <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">{status.totalProducts}</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600 mb-1">Assigned</p>
-              <p className="text-2xl font-bold text-blue-600">{status.assignedProducts}</p>
+            <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-1 tracking-[0.16em] uppercase">Assigned</p>
+              <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">{status.assignedProducts}</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600 mb-1">Unassigned</p>
-              <p className="text-2xl font-bold text-gray-600">{status.unassignedProducts}</p>
+            <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-1 tracking-[0.16em] uppercase">Unassigned</p>
+              <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">{status.unassignedProducts}</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600 mb-1">Control Group</p>
-              <p className="text-2xl font-bold text-orange-600">{status.controlCount}</p>
+            <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-1 tracking-[0.16em] uppercase">Control Group</p>
+              <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">{status.controlCount}</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600 mb-1">ML Variant</p>
-              <p className="text-2xl font-bold text-purple-600">{status.mlVariantCount}</p>
+            <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+              <p className="text-[10px] text-[var(--foreground-muted)] mb-1 tracking-[0.16em] uppercase">ML Variant</p>
+              <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">{status.mlVariantCount}</p>
             </div>
           </div>
         )}
 
         {/* Winner Card */}
         {winner && (
-          <div className={`mb-8 rounded-lg shadow-lg p-6 ${
-            winner.winner === 'ML_VARIANT' ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300' :
-            winner.winner === 'CONTROL' ? 'bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-300' :
-            'bg-gray-50'
-          }`}>
+          <div className="mb-8 fp-panel p-6 border-2 border-[var(--accent-subtle)]">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-2">
                   {winner.winner === 'ML_VARIANT' ? '🏆 ML Variant is Winning!' :
                    winner.winner === 'CONTROL' ? '🏆 Control is Winning!' :
                    '⚖️ Both Performing Equally'}
                 </h2>
-                <p className="text-gray-700 mb-1">{winner.message}</p>
-                <p className="text-sm text-gray-600">Confidence: <span className="font-semibold">{winner.confidence}</span> (sample: {winner.sampleSize})</p>
+                <p className="text-xs text-[var(--foreground)] mb-1">{winner.message}</p>
+                <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.12em] uppercase">Confidence: <span className="font-semibold">{winner.confidence}</span> (sample: {winner.sampleSize})</p>
               </div>
               <div className="text-right">
-                <p className="text-4xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-[var(--accent-subtle)] fp-card-price">
                   {winner.improvementPct > 0 ? '+' : ''}{winner.improvementPct.toFixed(1)}%
                 </p>
-                <p className="text-sm text-gray-600 mt-1">improvement</p>
+                <p className="text-[10px] text-[var(--foreground-muted)] mt-1 tracking-[0.12em] uppercase">improvement</p>
               </div>
             </div>
-            <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-              <p className="text-sm text-gray-700">
-                <strong>💡 Recommendation:</strong> {winner.recommendation}
+            <div className="mt-4 p-3 bg-white/5 border border-[var(--border-subtle)] rounded">
+              <p className="text-xs text-[var(--foreground)]">
+                <strong className="tracking-[0.12em] uppercase">💡 Recommendation:</strong> {winner.recommendation}
               </p>
             </div>
           </div>
@@ -252,99 +248,99 @@ export default function ExperimentsPage() {
 
         {/* Comparison Table */}
         {comparison && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Comparison</h2>
+          <div className="fp-panel p-6 mb-8">
+            <h2 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-4">Performance Comparison</h2>
             
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-[var(--border-subtle)]">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-[10px] font-semibold text-[var(--foreground-muted)] tracking-[0.16em] uppercase">
                       Metric
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-orange-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-[10px] font-semibold text-[var(--foreground-muted)] tracking-[0.16em] uppercase">
                       Control (Rule-Based)
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-purple-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-[10px] font-semibold text-[var(--foreground-muted)] tracking-[0.16em] uppercase">
                       ML Variant
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-green-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-[10px] font-semibold text-[var(--foreground-muted)] tracking-[0.16em] uppercase">
                       Lift
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <tbody className="divide-y divide-[var(--border-subtle)]">
+                  <tr className="hover:bg-white/5">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-[var(--foreground)]">
                       Conversion Rate
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.control.conversionRate.toFixed(2)}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.mlVariant.conversionRate.toFixed(2)}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-green-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right font-semibold text-[var(--accent-subtle)] fp-card-price">
                       {comparison.conversionLift > 0 ? '+' : ''}{comparison.conversionLift.toFixed(1)}%
                     </td>
                   </tr>
                   
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/5">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-[var(--foreground)]">
                       Revenue per Product
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       ${comparison.control.revenuePerProduct.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       ${comparison.mlVariant.revenuePerProduct.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-green-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right font-semibold text-[var(--accent-subtle)] fp-card-price">
                       {comparison.revenueLift > 0 ? '+' : ''}{comparison.revenueLift.toFixed(1)}%
                     </td>
                   </tr>
                   
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/5">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-[var(--foreground)]">
                       Units Sold
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.control.totalUnitsSold}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.mlVariant.totalUnitsSold}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold text-green-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right font-semibold text-[var(--accent-subtle)] fp-card-price">
                       {comparison.unitsLift > 0 ? '+' : ''}{comparison.unitsLift.toFixed(1)}%
                     </td>
                   </tr>
                   
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/5">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-[var(--foreground)]">
                       Total Revenue
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       ${comparison.control.totalRevenue.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       ${comparison.mlVariant.totalRevenue.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       ${(comparison.mlVariant.totalRevenue - comparison.control.totalRevenue).toFixed(2)}
                     </td>
                   </tr>
                   
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr className="hover:bg-white/5">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-[var(--foreground)]">
                       Avg Discount
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.control.avgDiscountPct.toFixed(1)}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {comparison.mlVariant.avgDiscountPct.toFixed(1)}%
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-right text-[var(--accent-subtle)] fp-card-price">
                       {(comparison.mlVariant.avgDiscountPct - comparison.control.avgDiscountPct).toFixed(1)}pp
                     </td>
                   </tr>
@@ -356,16 +352,16 @@ export default function ExperimentsPage() {
 
         {/* Insights */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">How It Works</h3>
-            <ul className="space-y-2 text-sm text-blue-800">
+          <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+            <h3 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-3">How It Works</h3>
+            <ul className="space-y-2 text-xs text-[var(--foreground)]">
               <li className="flex items-start">
                 <span className="mr-2">🎯</span>
-                <span><strong>Control Group:</strong> Uses rule-based discount logic based on expiry, inventory, and category</span>
+                <span><strong className="tracking-[0.12em] uppercase text-[var(--foreground-muted)]">Control Group:</strong> Uses rule-based discount logic based on expiry, inventory, and category</span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">🤖</span>
-                <span><strong>ML Variant:</strong> Uses XGBoost model to predict optimal discount based on historical data</span>
+                <span><strong className="tracking-[0.12em] uppercase text-[var(--foreground-muted)]">ML Variant:</strong> Uses XGBoost model to predict optimal discount based on historical data</span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">📊</span>
@@ -374,20 +370,20 @@ export default function ExperimentsPage() {
             </ul>
           </div>
           
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-green-900 mb-3">Success Metrics</h3>
-            <ul className="space-y-2 text-sm text-green-800">
+          <div className="fp-panel p-6 border border-[var(--border-subtle)]">
+            <h3 className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-3">Success Metrics</h3>
+            <ul className="space-y-2 text-xs text-[var(--foreground)]">
               <li className="flex items-start">
                 <span className="mr-2">💰</span>
-                <span><strong>Revenue Lift:</strong> Percentage increase in revenue per product</span>
+                <span><strong className="tracking-[0.12em] uppercase text-[var(--foreground-muted)]">Revenue Lift:</strong> Percentage increase in revenue per product</span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">🎯</span>
-                <span><strong>Conversion Lift:</strong> Improvement in purchase probability</span>
+                <span><strong className="tracking-[0.12em] uppercase text-[var(--foreground-muted)]">Conversion Lift:</strong> Improvement in purchase probability</span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">📈</span>
-                <span><strong>Units Lift:</strong> Additional units sold with ML recommendations</span>
+                <span><strong className="tracking-[0.12em] uppercase text-[var(--foreground-muted)]">Units Lift:</strong> Additional units sold with ML recommendations</span>
               </li>
             </ul>
           </div>

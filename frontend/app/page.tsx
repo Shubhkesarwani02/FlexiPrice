@@ -3,45 +3,66 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                FlexiPrice Store
-              </h1>
-              <p className="text-gray-600 mt-1 flex items-center gap-2">
-                <span>💰</span>
-                <span>Dynamic pricing for smart shopping</span>
-              </p>
-            </div>
-            <Link 
-              href="/admin" 
-              className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg font-medium"
-            >
-              🔧 Admin
-            </Link>
+      <header className="fp-shell-header">
+        <div className="fp-shell-header-inner">
+          <div className="fp-brand">
+            <h1 className="fp-brand-title">
+              <span>FlexiPrice</span> Console
+            </h1>
+            <p className="fp-brand-subtitle">Dynamic Pricing · Experiments · Inventory</p>
           </div>
+          <nav className="fp-nav">
+            <Link
+              href="/"
+              className="text-xs tracking-[0.16em] uppercase text-[var(--foreground-muted)] hover:text-[var(--accent)] transition-colors"
+            >
+              Storefront
+            </Link>
+            <Link href="/admin" className="fp-pill-button">
+              <span className="h-[1px] w-4 bg-[var(--accent-subtle)]" />
+              <span>Admin</span>
+            </Link>
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="fp-main">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">All Products</h2>
-            <p className="text-gray-600">
-              Browse our products with <span className="font-semibold text-blue-600">real-time dynamic pricing</span>. 
-              Prices update automatically every 30 seconds based on inventory and discounts.
-            </p>
+        <section className="fp-panel overflow-hidden">
+          <div className="fp-panel-header px-6 py-5 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--foreground-muted)]">
+                All Products
+              </h2>
+              <p className="mt-1 text-xs text-[var(--foreground-muted)]">
+                Real-time pricing, inventory-aware discounts, and experiment-driven recommendations.
+              </p>
+            </div>
+            <div className="flex gap-6">
+              <div className="fp-kpi">
+                <span className="fp-kpi-label">Refresh</span>
+                <span className="fp-kpi-value">30s</span>
+              </div>
+              <div className="fp-kpi">
+                <span className="fp-kpi-label">Mode</span>
+                <span className="fp-kpi-value">Live</span>
+              </div>
+            </div>
           </div>
-        </div>
+          <div className="fp-panel-body px-6 py-5 text-xs">
+            Prices are recalculated automatically based on inventory, demand, and
+            configured discount rules. Use the Admin console to inspect experiments
+            and tweak strategies.
+          </div>
+        </section>
 
         {/* Product Grid */}
-        <ProductGrid />
+        <section className="mt-8">
+          <ProductGrid />
+        </section>
       </main>
     </div>
   );

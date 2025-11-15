@@ -20,15 +20,15 @@ export default function ProductGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="fp-grid">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="border border-gray-200 rounded-xl p-5 animate-pulse bg-white">
-            <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mb-4" />
+          <div key={i} className="fp-card animate-pulse">
+            <div className="h-24 w-full rounded-md bg-[#111111] mb-4" />
             <div className="space-y-3">
-              <div className="h-5 bg-gray-200 rounded w-3/4" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
-              <div className="h-8 bg-gray-200 rounded w-2/3" />
-              <div className="h-6 bg-gray-200 rounded w-1/3" />
+              <div className="h-4 bg-[#111111] rounded w-3/4" />
+              <div className="h-3 bg-[#111111] rounded w-1/2" />
+              <div className="h-6 bg-[#111111] rounded w-2/3" />
+              <div className="h-5 bg-[#111111] rounded w-1/3" />
             </div>
           </div>
         ))}
@@ -39,15 +39,18 @@ export default function ProductGrid() {
   if (error) {
     return (
       <div className="text-center py-16 px-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-8 max-w-md mx-auto">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h3 className="text-xl font-semibold text-red-800 mb-2">Error Loading Products</h3>
-          <p className="text-red-600 text-sm mb-4">{error.message}</p>
+        <div className="fp-panel max-w-md mx-auto p-8 border border-[var(--danger)]">
+          <h3 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--danger)] mb-3">
+            Error Loading Products
+          </h3>
+          <p className="text-xs text-[var(--foreground-muted)] mb-4 fp-card-price">
+            {error.message}
+          </p>
           <button
             onClick={() => mutate()}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+            className="fp-pill-button text-[10px] tracking-[0.18em] uppercase border-[var(--danger)]"
           >
-            Try Again
+            Retry
           </button>
         </div>
       </div>
@@ -57,10 +60,14 @@ export default function ProductGrid() {
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-16 px-4">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 max-w-md mx-auto">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Products Available</h3>
-          <p className="text-gray-600 text-sm">Check back later for new products</p>
+        <div className="fp-panel max-w-md mx-auto p-10">
+          <h3 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--foreground-muted)] mb-3">
+            No Products Available
+          </h3>
+          <p className="text-xs text-[var(--foreground-muted)]">
+            Once products exist in the system, they will appear here with
+            live pricing and discount signals.
+          </p>
         </div>
       </div>
     );
@@ -70,19 +77,19 @@ export default function ProductGrid() {
     <>
       {/* Results Count */}
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold text-gray-900">{products.length}</span> products
+        <p className="text-[11px] text-[var(--foreground-muted)] tracking-[0.16em] uppercase">
+          Showing <span className="text-[var(--accent)]">{products.length}</span> products
         </p>
         <button
           onClick={() => mutate()}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          className="fp-pill-button text-[10px] tracking-[0.18em] uppercase"
         >
-          <span>🔄</span> Refresh Prices
+          Refresh Prices
         </button>
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="fp-grid">
         {products.map((product) => (
           <ProductCard key={product.sku} product={product} />
         ))}

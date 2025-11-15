@@ -86,12 +86,17 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
+      <div className="min-h-screen fp-shell flex items-center justify-center">
+        <div className="fp-panel w-full max-w-md p-8">
+          <h1 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--accent-subtle)] mb-6 text-center">
+            Admin Login
+          </h1>
+          <form onSubmit={handleLogin} className="space-y-4 text-sm">
             <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="token"
+                className="block text-xs font-medium mb-2 tracking-[0.16em] uppercase text-[var(--foreground-muted)]"
+              >
                 Admin Token
               </label>
               <input
@@ -99,23 +104,26 @@ export default function AdminPage() {
                 id="token"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 bg-black/40 border border-[var(--border-subtle)] rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price"
                 placeholder="Enter admin token"
                 required
               />
             </div>
             {authError && (
-              <p className="text-red-600 text-sm">{authError}</p>
+              <p className="text-[var(--danger)] text-xs mt-1">{authError}</p>
             )}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+              className="w-full fp-pill-button justify-center mt-4"
             >
               Login
             </button>
           </form>
           <div className="mt-6 text-center">
-            <Link href="/" className="text-blue-600 hover:underline text-sm">
+            <Link
+              href="/"
+              className="text-[11px] tracking-[0.16em] uppercase text-[var(--foreground-muted)] hover:text-[var(--accent)]"
+            >
               ← Back to store
             </Link>
           </div>
@@ -125,56 +133,53 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Manage products and discounts</p>
-            </div>
-            <div className="flex gap-4">
-              <Link 
-                href="/" 
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                Store
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
+    <div className="fp-shell">
+      <header className="fp-shell-header">
+        <div className="fp-shell-header-inner">
+          <div className="fp-brand">
+            <h1 className="fp-brand-title">
+              <span>FlexiPrice</span> Admin
+            </h1>
+            <p className="fp-brand-subtitle">Products · Discounts · Inventory</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="text-[11px] tracking-[0.16em] uppercase text-[var(--foreground-muted)] hover:text-[var(--accent)]"
+            >
+              Storefront
+            </Link>
+            <button onClick={handleLogout} className="fp-pill-button text-[10px]">
+              Logout
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="fp-main">
         {/* Success Message */}
         {successMessage && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span>✅</span>
-              <span>{successMessage}</span>
-            </span>
-            <button onClick={() => setSuccessMessage('')} className="text-green-600 hover:text-green-800">
+          <div className="mb-6 fp-panel px-4 py-3 flex items-center justify-between border border-[var(--accent-subtle)] text-xs">
+            <span className="text-[var(--accent-subtle)]">{successMessage}</span>
+            <button
+              onClick={() => setSuccessMessage('')}
+              className="text-[var(--foreground-muted)] hover:text-[var(--accent-subtle)]"
+            >
               ×
             </button>
           </div>
         )}
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
+        <div className="border-b border-[var(--border-subtle)] mb-6">
+          <nav className="-mb-px flex space-x-6 text-xs">
             <button
               onClick={() => setActiveTab('products')}
               className={`${
                 activeTab === 'products'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  ? 'border-[var(--accent-subtle)] text-[var(--accent-subtle)]'
+                  : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--accent-subtle)] hover:border-[var(--border-subtle)]'
+              } whitespace-nowrap py-3 px-1 border-b font-medium tracking-[0.18em] uppercase transition-colors`}
             >
               Products ({products?.length || 0})
             </button>
@@ -182,9 +187,9 @@ export default function AdminPage() {
               onClick={() => setActiveTab('inventory')}
               className={`${
                 activeTab === 'inventory'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  ? 'border-[var(--accent-subtle)] text-[var(--accent-subtle)]'
+                  : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--accent-subtle)] hover:border-[var(--border-subtle)]'
+              } whitespace-nowrap py-3 px-1 border-b font-medium tracking-[0.18em] uppercase transition-colors`}
             >
               Inventory
             </button>
@@ -192,9 +197,9 @@ export default function AdminPage() {
               onClick={() => setActiveTab('discounts')}
               className={`${
                 activeTab === 'discounts'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  ? 'border-[var(--accent-subtle)] text-[var(--accent-subtle)]'
+                  : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--accent-subtle)] hover:border-[var(--border-subtle)]'
+              } whitespace-nowrap py-3 px-1 border-b font-medium tracking-[0.18em] uppercase transition-colors`}
             >
               Discounts ({discounts?.length || 0})
             </button>
@@ -204,59 +209,59 @@ export default function AdminPage() {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Products</h2>
+            <div className="mb-6 flex justify-between items-center text-xs">
+              <h2 className="tracking-[0.18em] uppercase text-[var(--foreground-muted)]">Products</h2>
               <button
                 onClick={() => setActiveModal('product')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                className="fp-pill-button flex items-center gap-2 text-[10px]"
               >
                 <span>+</span> Add Product
               </button>
             </div>
 
             {productsLoading ? (
-              <div className="text-center py-12">Loading products...</div>
+              <div className="text-center py-12 text-xs text-[var(--foreground-muted)]">Loading products...</div>
             ) : products && products.length > 0 ? (
-              <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="fp-panel overflow-hidden">
+                <table className="min-w-full divide-y divide-[var(--border-subtle)] text-xs">
+                  <thead className="bg-black/40">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         SKU
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Category
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Base Price
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
                     {products.map((product) => (
-                      <tr key={product.sku} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <tr key={product.sku} className="hover:bg-black/40">
+                        <td className="px-6 py-3 whitespace-nowrap font-medium">
                           {product.sku}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           {product.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-3 whitespace-nowrap text-[var(--foreground-muted)]">
                           {product.category || '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           ${product.base_price.toFixed(2)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           <Link
                             href={`/product/${product.sku}`}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-[11px] tracking-[0.16em] uppercase text-[var(--accent-subtle)] hover:text-[var(--accent)]"
                           >
                             View
                           </Link>
@@ -267,8 +272,8 @@ export default function AdminPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-500">No products found</p>
+              <div className="text-center py-12 fp-panel">
+                <p className="text-[var(--foreground-muted)] text-xs">No products found</p>
               </div>
             )}
           </div>
@@ -277,66 +282,66 @@ export default function AdminPage() {
         {/* Discounts Tab */}
         {activeTab === 'discounts' && (
           <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Discounts</h2>
+            <div className="mb-6 flex justify-between items-center text-xs">
+              <h2 className="tracking-[0.18em] uppercase text-[var(--foreground-muted)]">Discounts</h2>
             </div>
 
             {discountsLoading ? (
-              <div className="text-center py-12">Loading discounts...</div>
+              <div className="text-center py-12 text-xs text-[var(--foreground-muted)]">Loading discounts...</div>
             ) : discounts && discounts.length > 0 ? (
-              <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="fp-panel overflow-hidden">
+                <table className="min-w-full divide-y divide-[var(--border-subtle)] text-xs">
+                  <thead className="bg-black/40">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         SKU
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Type
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Value
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Priority
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-[10px] font-medium text-[var(--foreground-muted)] uppercase tracking-[0.18em]">
                         Valid Until
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
                     {discounts.map((discount) => (
-                      <tr key={discount.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <tr key={discount.id} className="hover:bg-black/40">
+                        <td className="px-6 py-3 whitespace-nowrap font-medium">
                           {discount.sku}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           {discount.discount_type}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           {discount.discount_type === 'percentage' 
                             ? `${discount.value}%` 
                             : `$${discount.value}`}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           {discount.priority}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-3 whitespace-nowrap">
                           <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            className={`px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full border ${
                               discount.is_active
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                ? 'border-[var(--accent-subtle)] text-[var(--accent-subtle)]'
+                                : 'border-[var(--foreground-muted)] text-[var(--foreground-muted)]'
                             }`}
                           >
                             {discount.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-3 whitespace-nowrap text-[var(--foreground-muted)]">
                           {discount.end_date 
                             ? new Date(discount.end_date).toLocaleDateString() 
                             : '-'}
@@ -347,8 +352,8 @@ export default function AdminPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-500">No discounts found</p>
+              <div className="text-center py-12 fp-panel">
+                <p className="text-[var(--foreground-muted)] text-xs">No discounts found</p>
               </div>
             )}
           </div>
@@ -357,21 +362,21 @@ export default function AdminPage() {
         {/* Inventory Tab */}
         {activeTab === 'inventory' && (
           <div>
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Inventory Batches</h2>
+            <div className="mb-6 flex justify-between items-center text-xs">
+              <h2 className="tracking-[0.18em] uppercase text-[var(--foreground-muted)]">Inventory Batches</h2>
               <button
                 onClick={() => setActiveModal('inventory')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                className="fp-pill-button flex items-center gap-2 text-[10px]"
               >
                 <span>+</span> Add Inventory Batch
               </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-600">
+            <div className="fp-panel p-8 text-center text-xs">
+              <p className="text-[var(--foreground-muted)]">
                 Inventory batch management will be available here.
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-[var(--foreground-muted)] mt-2">
                 Click &quot;Add Inventory Batch&quot; to add new inventory with expiry dates.
               </p>
             </div>

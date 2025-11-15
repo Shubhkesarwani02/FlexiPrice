@@ -34,11 +34,11 @@ export default function SalesVsExpiryChart({ data }: Props) {
   }));
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">
+    <div className="fp-panel p-6">
+      <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--foreground-muted)] mb-2">
         Sales vs Days to Expiry
       </h2>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-[10px] text-[var(--foreground-muted)] mb-4 tracking-[0.12em] uppercase">
         How product sales correlate with proximity to expiration date
       </p>
       
@@ -65,17 +65,17 @@ export default function SalesVsExpiryChart({ data }: Props) {
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-                    <p className="font-semibold">
+                  <div className="fp-panel p-3 border border-[var(--border-strong)] text-xs">
+                    <p className="font-semibold text-[var(--accent-subtle)]">
                       {payload[0].payload.days} days to expiry
                     </p>
-                    <p className="text-blue-600">
+                    <p className="text-[var(--accent-subtle)]">
                       Units Sold: {payload[0].payload.units}
                     </p>
-                    <p className="text-green-600">
+                    <p className="text-[var(--accent-subtle)]">
                       Revenue: ${payload[0].payload.revenue.toFixed(2)}
                     </p>
-                    <p className="text-orange-600">
+                    <p className="text-[var(--foreground-muted)]">
                       Avg Discount: {payload[0].payload.discount.toFixed(1)}%
                     </p>
                   </div>
@@ -89,7 +89,7 @@ export default function SalesVsExpiryChart({ data }: Props) {
             yAxisId="left"
             type="monotone"
             dataKey="units"
-            stroke="#3b82f6"
+            stroke="#f5f5f5"
             strokeWidth={2}
             name="Units Sold"
             dot={{ r: 4 }}
@@ -99,7 +99,7 @@ export default function SalesVsExpiryChart({ data }: Props) {
             yAxisId="right"
             type="monotone"
             dataKey="discount"
-            stroke="#f97316"
+            stroke="#a3a3a3"
             strokeWidth={2}
             name="Avg Discount %"
             dot={{ r: 4 }}
@@ -108,22 +108,22 @@ export default function SalesVsExpiryChart({ data }: Props) {
         </LineChart>
       </ResponsiveContainer>
       
-      <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-        <div className="bg-blue-50 p-3 rounded">
-          <p className="text-sm text-gray-600">Total Units</p>
-          <p className="text-xl font-bold text-blue-600">
+      <div className="mt-4 grid grid-cols-3 gap-4 text-center text-xs">
+        <div className="border border-[var(--border-subtle)] bg-black/40 p-3 rounded">
+          <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.16em] uppercase">Total Units</p>
+          <p className="text-lg font-bold text-[var(--accent-subtle)] fp-card-price">
             {chartData.reduce((sum, item) => sum + item.units, 0)}
           </p>
         </div>
-        <div className="bg-green-50 p-3 rounded">
-          <p className="text-sm text-gray-600">Total Revenue</p>
-          <p className="text-xl font-bold text-green-600">
+        <div className="border border-[var(--border-subtle)] bg-black/40 p-3 rounded">
+          <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.16em] uppercase">Total Revenue</p>
+          <p className="text-lg font-bold text-[var(--accent-subtle)] fp-card-price">
             ${chartData.reduce((sum, item) => sum + item.revenue, 0).toFixed(2)}
           </p>
         </div>
-        <div className="bg-orange-50 p-3 rounded">
-          <p className="text-sm text-gray-600">Avg Discount</p>
-          <p className="text-xl font-bold text-orange-600">
+        <div className="border border-[var(--border-subtle)] bg-black/40 p-3 rounded">
+          <p className="text-[10px] text-[var(--foreground-muted)] tracking-[0.16em] uppercase">Avg Discount</p>
+          <p className="text-lg font-bold text-[var(--accent-subtle)] fp-card-price">
             {(chartData.reduce((sum, item) => sum + item.discount, 0) / chartData.length).toFixed(1)}%
           </p>
         </div>

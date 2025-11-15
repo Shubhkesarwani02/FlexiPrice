@@ -100,16 +100,16 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 text-sm">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+        <div className="border border-[var(--danger)] text-[var(--danger)] px-4 py-3 rounded-md bg-black/40 text-xs">
           {error}
         </div>
       )}
 
       {/* SKU */}
       <div>
-        <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="sku" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           SKU <span className="text-red-500">*</span>
         </label>
         <input
@@ -118,17 +118,17 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           name="sku"
           value={formData.sku}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.sku ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.sku ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., LAPTOP-001"
         />
-        {errors.sku && <p className="text-red-500 text-sm mt-1">{errors.sku}</p>}
+        {errors.sku && <p className="text-[var(--danger)] text-xs mt-1">{errors.sku}</p>}
       </div>
 
       {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="name" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Product Name <span className="text-red-500">*</span>
         </label>
         <input
@@ -137,17 +137,17 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.name ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., Premium Laptop Pro"
         />
-        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+        {errors.name && <p className="text-[var(--danger)] text-xs mt-1">{errors.name}</p>}
       </div>
 
       {/* Category */}
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="category" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Category
         </label>
         <input
@@ -156,17 +156,17 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           name="category"
           value={formData.category}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.category ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.category ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., Electronics"
         />
-        {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+        {errors.category && <p className="text-[var(--danger)] text-xs mt-1">{errors.category}</p>}
       </div>
 
       {/* Base Price */}
       <div>
-        <label htmlFor="basePrice" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="basePrice" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Base Price ($) <span className="text-red-500">*</span>
         </label>
         <input
@@ -177,17 +177,17 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           onChange={handleChange}
           step="0.01"
           min="0"
-          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-            errors.basePrice ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-3 py-2 bg-black/40 border rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price ${
+            errors.basePrice ? 'border-[var(--danger)]' : 'border-[var(--border-subtle)]'
           }`}
           placeholder="e.g., 999.99"
         />
-        {errors.basePrice && <p className="text-red-500 text-sm mt-1">{errors.basePrice}</p>}
+        {errors.basePrice && <p className="text-[var(--danger)] text-xs mt-1">{errors.basePrice}</p>}
       </div>
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-xs font-medium mb-1 tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
           Description
         </label>
         <textarea
@@ -196,17 +196,17 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           value={formData.description}
           onChange={handleChange}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 bg-black/40 border border-[var(--border-subtle)] rounded-md outline-none focus:ring-0 focus:border-[var(--accent)] fp-card-price"
           placeholder="Product description..."
         />
       </div>
 
       {/* Form Actions */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-4 text-xs">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+          className="flex-1 fp-pill-button justify-center disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? 'Creating...' : 'Create Product'}
         </button>
@@ -214,7 +214,7 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 disabled:bg-gray-100 transition-colors font-medium"
+          className="flex-1 border border-[var(--border-subtle)] rounded-full py-2 px-4 text-[var(--foreground-muted)] hover:border-[var(--accent-subtle)] hover:text-[var(--accent)] transition-colors"
         >
           Cancel
         </button>

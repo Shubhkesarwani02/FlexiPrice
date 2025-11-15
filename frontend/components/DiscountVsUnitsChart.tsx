@@ -26,8 +26,8 @@ interface Props {
   data: DiscountVsUnitsData[];
 }
 
-// Color palette for bars
-const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e'];
+// Color palette for bars - monochrome gradients
+const COLORS = ['#f5f5f5', '#d4d4d4', '#a3a3a3', '#737373', '#525252', '#404040'];
 
 export default function DiscountVsUnitsChart({ data }: Props) {
   // Transform data for recharts
@@ -41,11 +41,11 @@ export default function DiscountVsUnitsChart({ data }: Props) {
   }));
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">
+    <div className="fp-panel p-6">
+      <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-[var(--foreground-muted)] mb-2">
         Discount Percentage vs Units Sold
       </h2>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-[10px] text-[var(--foreground-muted)] mb-4 tracking-[0.12em] uppercase">
         Impact of different discount levels on sales performance
       </p>
       
@@ -73,21 +73,21 @@ export default function DiscountVsUnitsChart({ data }: Props) {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
                 return (
-                  <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
-                    <p className="font-semibold mb-2">{data.range}</p>
-                    <p className="text-blue-600">
+                  <div className="fp-panel p-3 border border-[var(--border-strong)] text-xs">
+                    <p className="font-semibold mb-2 text-[var(--accent-subtle)]">{data.range}</p>
+                    <p className="text-[var(--accent-subtle)]">
                       Units Sold: {data.units}
                     </p>
-                    <p className="text-green-600">
+                    <p className="text-[var(--accent-subtle)]">
                       Revenue: ${data.revenue.toFixed(2)}
                     </p>
-                    <p className="text-purple-600">
+                    <p className="text-[var(--foreground-muted)]">
                       Transactions: {data.transactions}
                     </p>
-                    <p className="text-orange-600">
+                    <p className="text-[var(--foreground-muted)]">
                       Conversion: {data.conversion.toFixed(1)}%
                     </p>
-                    <p className="text-gray-600 text-sm mt-1">
+                    <p className="text-[var(--foreground-muted)] text-[10px] mt-1">
                       Avg: {data.avgDiscount.toFixed(1)}%
                     </p>
                   </div>
@@ -111,24 +111,24 @@ export default function DiscountVsUnitsChart({ data }: Props) {
             yAxisId="right"
             dataKey="conversion"
             name="Conversion Rate %"
-            fill="#8b5cf6"
+            fill="#737373"
             radius={[8, 8, 0, 0]}
             opacity={0.6}
           />
         </BarChart>
       </ResponsiveContainer>
       
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded">
-          <p className="text-sm text-gray-600 mb-2">Best Performing Discount</p>
+      <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
+        <div className="border border-[var(--border-subtle)] bg-black/40 p-4 rounded">
+          <p className="text-[10px] text-[var(--foreground-muted)] mb-2 tracking-[0.16em] uppercase">Best Performing Discount</p>
           {chartData.length > 0 && (() => {
             const best = chartData.reduce((max, item) =>
               item.units > max.units ? item : max
             );
             return (
               <>
-                <p className="text-2xl font-bold text-blue-600">{best.range}</p>
-                <p className="text-sm text-gray-600">
+                <p className="text-xl font-bold text-[var(--accent-subtle)]">{best.range}</p>
+                <p className="text-[10px] text-[var(--foreground-muted)]">
                   {best.units} units • {best.conversion.toFixed(1)}% conversion
                 </p>
               </>
@@ -136,18 +136,18 @@ export default function DiscountVsUnitsChart({ data }: Props) {
           })()}
         </div>
         
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded">
-          <p className="text-sm text-gray-600 mb-2">Highest Revenue</p>
+        <div className="border border-[var(--border-subtle)] bg-black/40 p-4 rounded">
+          <p className="text-[10px] text-[var(--foreground-muted)] mb-2 tracking-[0.16em] uppercase">Highest Revenue</p>
           {chartData.length > 0 && (() => {
             const best = chartData.reduce((max, item) =>
               item.revenue > max.revenue ? item : max
             );
             return (
               <>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xl font-bold text-[var(--accent-subtle)] fp-card-price">
                   ${best.revenue.toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-[10px] text-[var(--foreground-muted)]">
                   {best.range} • {best.transactions} transactions
                 </p>
               </>
@@ -156,9 +156,9 @@ export default function DiscountVsUnitsChart({ data }: Props) {
         </div>
       </div>
       
-      <div className="mt-4 p-4 bg-amber-50 rounded border border-amber-200">
-        <p className="text-sm text-amber-800">
-          <strong>💡 Insight:</strong> Higher discounts generally increase unit sales but may reduce total revenue. 
+      <div className="mt-4 p-4 border border-[var(--border-subtle)] bg-black/40 rounded text-xs">
+        <p className="text-[var(--foreground-muted)]">
+          <strong className="text-[var(--accent-subtle)]">Insight:</strong> Higher discounts generally increase unit sales but may reduce total revenue. 
           Find the sweet spot that balances conversion and profitability.
         </p>
       </div>

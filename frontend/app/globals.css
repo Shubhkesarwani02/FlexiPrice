@@ -1,8 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Monochrome palette */
+  --background: #050505;
+  --background-elevated: #0c0c0c;
+  --background-subtle: #111111;
+  --border-subtle: #1f1f1f;
+  --border-strong: #2b2b2b;
+  --foreground: #f5f5f5;
+  --foreground-muted: #a3a3a3;
+  --accent: #ffffff;
+  --accent-subtle: #d4d4d4;
+  --danger: #f97373;
+
+  /* Radii & shadows */
+  --radius-lg: 0.8rem;
+  --radius-md: 0.5rem;
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.6);
+  --shadow-subtle: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -12,15 +27,191 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: radial-gradient(circle at top, #111111 0, #000000 55%, #050505 100%);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
 }
 
-body {
-  background: var(--background);
+/* App shell */
+.fp-shell {
+  min-height: 100vh;
+  background: transparent;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.fp-shell-header {
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(18px);
+}
+
+.fp-shell-header-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.fp-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fp-brand-title {
+  font-size: 1.75rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fp-brand-title span {
+  color: var(--accent);
+}
+
+.fp-brand-subtitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--foreground-muted);
+}
+
+.fp-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fp-pill-button {
+  border-radius: 999px;
+  padding: 0.55rem 1.25rem;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(135deg, #111111, #050505);
+  color: var(--foreground);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease,
+    transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-subtle);
+}
+
+.fp-pill-button:hover {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #181818, #050505);
+  transform: translateY(-0.5px);
+  box-shadow: var(--shadow-soft);
+}
+
+.fp-main {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3.5rem;
+}
+
+.fp-panel {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: radial-gradient(circle at top left, #141414, #050505);
+  box-shadow: var(--shadow-soft);
+}
+
+.fp-panel-header {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.fp-panel-body {
+  color: var(--foreground-muted);
+}
+
+.fp-kpi {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fp-kpi-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--foreground-muted);
+}
+
+.fp-kpi-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-subtle);
+}
+
+/* Product card */
+.fp-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(145deg, #111111, #050505);
+  padding: 1.1rem;
+  transition: border-color 0.18s ease, transform 0.16s ease,
+    box-shadow 0.18s ease, background 0.22s ease;
+}
+
+.fp-card:hover {
+  border-color: var(--accent-subtle);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+  background: linear-gradient(145deg, #171717, #050505);
+}
+
+.fp-card-title {
+  font-size: 0.98rem;
+  font-weight: 550;
+  letter-spacing: 0.03em;
+}
+
+.fp-card-meta {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--foreground-muted);
+}
+
+.fp-card-price {
+  font-variant-numeric: tabular-nums;
+}
+
+.fp-badge {
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: #050505;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.fp-badge-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.fp-chip-save {
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  border: 1px dashed var(--accent-subtle);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
 }

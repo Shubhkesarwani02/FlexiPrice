@@ -34,6 +34,8 @@ class RecommendationResponse(BaseModel):
     """Response containing discount recommendations."""
     recommendations: List[DiscountRecommendation]
     model_info: dict
+    
+    model_config = {"protected_namespaces": ()}
 
 
 @router.get(

@@ -14,50 +14,56 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.sku}`}>
-      <div className="group border border-gray-200 rounded-xl p-5 hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer bg-white">
-        {/* Product Image */}
-        <div className="relative aspect-square bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-          <span className="text-6xl group-hover:scale-110 transition-transform duration-300">📦</span>
+      <div className="group fp-card cursor-pointer">
+        {/* Product Image / Glyph */}
+        <div className="relative mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-md border border-[var(--border-strong)] flex items-center justify-center text-xs tracking-[0.16em] uppercase text-[var(--foreground-muted)]">
+              SKU
+            </div>
+            <div className="min-w-0">
+              <h3 className="fp-card-title truncate group-hover:text-[var(--accent)] transition-colors">
+                {product.name}
+              </h3>
+              {product.category && (
+                <p className="fp-card-meta mt-1 truncate">
+                  {product.category}
+                </p>
+              )}
+            </div>
+          </div>
           {hasDiscount && (
-            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+            <div className="fp-badge fp-badge-danger">
               -{discountPct.toFixed(0)}%
             </div>
           )}
         </div>
-        
-        {/* Product Info */}
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg mb-1 truncate text-gray-900 group-hover:text-blue-600 transition-colors">
-            {product.name}
-          </h3>
-          
-          {product.category && (
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">
-              {product.category}
-            </p>
-          )}
-          
-          {/* Price Display */}
-          <div className="pt-2">
+
+        {/* Price Display */}
+        <div className="flex items-end justify-between gap-4 fp-card-price">
+          <div>
             {hasDiscount ? (
               <>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl font-bold text-green-600">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-lg font-semibold text-[var(--accent)]">
                     ${storefrontPrice.toFixed(2)}
                   </span>
-                  <span className="text-base text-gray-400 line-through font-medium">
+                  <span className="text-xs line-through text-[var(--foreground-muted)]">
                     ${basePrice.toFixed(2)}
                   </span>
                 </div>
-                <div className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-md">
-                  💰 Save ${savings.toFixed(2)}
+                <div className="fp-chip-save text-[var(--accent-subtle)]">
+                  Save ${savings.toFixed(2)}
                 </div>
               </>
             ) : (
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-lg font-semibold text-[var(--accent)]">
                 ${storefrontPrice.toFixed(2)}
               </span>
             )}
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--foreground-muted)]">
+            View details
           </div>
         </div>
       </div>
