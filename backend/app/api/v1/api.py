@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import products, inventory, discounts
+from app.api.v1.endpoints import products, inventory, discounts, ml_admin
 
 api_router = APIRouter()
 
@@ -20,4 +20,10 @@ api_router.include_router(
     discounts.router,
     prefix="/admin/discounts",
     tags=["admin-discounts"]
+)
+
+api_router.include_router(
+    ml_admin.router,
+    prefix="/admin/ml",
+    tags=["admin-ml"]
 )
