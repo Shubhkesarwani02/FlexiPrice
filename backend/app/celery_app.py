@@ -20,6 +20,7 @@ celery_app = Celery(
 
 # Celery configuration
 celery_app.conf.update(
+    broker_connection_retry_on_startup=True,  # Retry broker connection on startup
     task_serializer="json",
     accept_content=["json"],
     result_serializer="json",
