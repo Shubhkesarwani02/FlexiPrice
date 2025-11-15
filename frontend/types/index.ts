@@ -1,11 +1,20 @@
 export interface Product {
+  id: number;
   sku: string;
   name: string;
   base_price: number;
+  basePrice: number; // API alias
   category?: string;
   description?: string;
   created_at?: string;
+  createdAt?: string; // API alias
   updated_at?: string;
+  updatedAt?: string; // API alias
+}
+
+export interface ProductWithStorefrontPrice extends Product {
+  storefront_price: number;
+  discount_pct?: number | null;
 }
 
 export interface Inventory {

@@ -161,12 +161,18 @@ Once the server is running, visit:
 - [x] **Day 4**: Redis caching + monitoring
 
 ### Week 3 — Frontend MVP (In Progress)
-- [x] **Day 1**: Next.js skeleton
+- [x] **Day 1**: Next.js skeleton ✅
   - [x] Homepage with product grid
   - [x] Product detail pages
   - [x] Admin dashboard (token-protected)
   - [x] SWR integration for data fetching
-- [ ] **Day 2**: Component polish & state management
+- [x] **Day 2**: Product grid + fetch ✅
+  - [x] SWR/React Query integration
+  - [x] Enhanced product cards
+  - [x] Crossed-out base price display
+  - [x] Highlighted computed prices
+  - [x] Real-time price updates
+  - [x] Visual polish & animations
 - [ ] **Day 3**: Admin CRUD forms
 - [ ] **Day 4**: Deploy to Vercel
 
