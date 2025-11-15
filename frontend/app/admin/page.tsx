@@ -5,15 +5,22 @@ import useSWR from 'swr';
 import { api } from '@/lib/api';
 import { Product, Discount } from '@/types';
 import Link from 'next/link';
+import Modal from '@/components/Modal';
+import ProductForm from '@/components/ProductForm';
+import InventoryForm from '@/components/InventoryForm';
 
 const productsFetcher = () => api.getProducts().then(res => res.data);
 const discountsFetcher = () => api.getAllDiscounts().then(res => res.data);
+
+type ModalType = 'product' | 'inventory' | null;
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'products' | 'discounts'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'discounts' | 'inventory'>('products');
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Check authentication on mount
   useEffect(() => {
@@ -25,6 +32,14 @@ export default function AdminPage() {
     };
     checkAuth();
   }, []);
+
+  // Auto-hide success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +60,7 @@ export default function AdminPage() {
     setToken('');
   };
 
-  const { data: products, isLoading: productsLoading } = useSWR<Product[]>(
+  const { data: products, isLoading: productsLoading, mutate: mutateProducts } = useSWR<Product[]>(
     isAuthenticated ? '/admin/products' : null,
     productsFetcher,
     { refreshInterval: 30000 }
@@ -56,6 +71,18 @@ export default function AdminPage() {
     discountsFetcher,
     { refreshInterval: 30000 }
   );
+
+  const handleProductSuccess = () => {
+    setActiveModal(null);
+    setSuccessMessage('Product created successfully!');
+    mutateProducts();
+  };
+
+  const handleInventorySuccess = () => {
+    setActiveModal(null);
+    setSuccessMessage('Inventory batch added successfully!');
+    mutateProducts();
+  };
 
   if (!isAuthenticated) {
     return (
@@ -125,6 +152,19 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span>✅</span>
+              <span>{successMessage}</span>
+            </span>
+            <button onClick={() => setSuccessMessage('')} className="text-green-600 hover:text-green-800">
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
@@ -137,6 +177,16 @@ export default function AdminPage() {
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
             >
               Products ({products?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`${
+                activeTab === 'inventory'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+            >
+              Inventory
             </button>
             <button
               onClick={() => setActiveTab('discounts')}
@@ -156,6 +206,12 @@ export default function AdminPage() {
           <div>
             <div className="mb-6 flex justify-between items-center">
               <h2 className="text-2xl font-semibold">Products</h2>
+              <button
+                onClick={() => setActiveModal('product')}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              >
+                <span>+</span> Add Product
+              </button>
             </div>
 
             {productsLoading ? (
@@ -297,7 +353,54 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* Inventory Tab */}
+        {activeTab === 'inventory' && (
+          <div>
+            <div className="mb-6 flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Inventory Batches</h2>
+              <button
+                onClick={() => setActiveModal('inventory')}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              >
+                <span>+</span> Add Inventory Batch
+              </button>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+              <p className="text-gray-600">
+                Inventory batch management will be available here.
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                Click &quot;Add Inventory Batch&quot; to add new inventory with expiry dates.
+              </p>
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* Modals */}
+      <Modal
+        isOpen={activeModal === 'product'}
+        onClose={() => setActiveModal(null)}
+        title="Create New Product"
+      >
+        <ProductForm
+          onSuccess={handleProductSuccess}
+          onCancel={() => setActiveModal(null)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'inventory'}
+        onClose={() => setActiveModal(null)}
+        title="Add Inventory Batch"
+      >
+        <InventoryForm
+          onSuccess={handleInventorySuccess}
+          onCancel={() => setActiveModal(null)}
+        />
+      </Modal>
     </div>
   );
 }
