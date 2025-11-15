@@ -7,12 +7,14 @@ from typing import Optional
 # Batch Discount Schemas
 class BatchDiscountBase(BaseModel):
     """Base batch discount schema."""
-    batch_id: int = Field(..., gt=0, description="Inventory batch ID")
-    computed_price: Decimal = Field(..., gt=0, description="Computed discounted price")
-    discount_pct: Decimal = Field(..., ge=0, le=100, description="Discount percentage")
-    valid_from: datetime = Field(default_factory=datetime.utcnow, description="Discount valid from")
-    valid_to: Optional[datetime] = Field(None, description="Discount valid until")
-    ml_recommended: bool = Field(False, description="Whether discount was ML recommended")
+    batch_id: int = Field(..., gt=0, description="Inventory batch ID", alias="batchId")
+    computed_price: Decimal = Field(..., gt=0, description="Computed discounted price", alias="computedPrice")
+    discount_pct: Decimal = Field(..., ge=0, le=100, description="Discount percentage", alias="discountPct")
+    valid_from: datetime = Field(default_factory=datetime.utcnow, description="Discount valid from", alias="validFrom")
+    valid_to: Optional[datetime] = Field(None, description="Discount valid until", alias="validTo")
+    ml_recommended: bool = Field(False, description="Whether discount was ML recommended", alias="mlRecommended")
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class BatchDiscountCreate(BatchDiscountBase):
@@ -31,9 +33,9 @@ class BatchDiscountUpdate(BaseModel):
 class BatchDiscountResponse(BatchDiscountBase):
     """Schema for batch discount response."""
     id: int
-    created_at: datetime
+    created_at: datetime = Field(alias="createdAt")
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class DiscountCalculationRequest(BaseModel):
@@ -50,4 +52,5 @@ class DiscountCalculationResponse(BaseModel):
     discounted_price: Decimal
     days_to_expiry: int
     ml_recommended: bool
+    reason: Optional[str] = Field(None, description="Reason for discount (rule name)")
     reason: str = Field(..., description="Reason for discount percentage")

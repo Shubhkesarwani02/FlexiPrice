@@ -1,256 +1,288 @@
 """
-Discount Engine Module
+Discount Engine Module for FlexiPrice
 
-Rule-based discount calculation engine for expiry-based dynamic pricing.
-Supports configurable rules with conditions on days_to_expiry, quantity, and category.
+This module implements the core discount calculation logic based on configurable rules.
+Rules are evaluated against inventory batches to compute optimal discounts.
 """
 
+import yaml
 from typing import Dict, List, Optional, Tuple
 from decimal import Decimal
-from datetime import date, datetime
 from pathlib import Path
-import yaml
+from datetime import date, datetime
+import logging
 
-from app.core.config import get_settings
-
-settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 class DiscountRule:
-    """Represents a single discount rule."""
+    """Represents a single discount rule with conditions and discount percentage."""
     
-    def __init__(
-        self,
-        name: str,
-        conditions: Dict,
-        discount_pct: float,
-        price_floor: float,
-        description: Optional[str] = None,
-    ):
+    def __init__(self, name: str, condition: Dict, discount: float, priority: int):
         self.name = name
-        self.conditions = conditions
-        self.discount_pct = discount_pct
-        self.price_floor = price_floor
-        self.description = description
-
-    def evaluate(self, days_to_expiry: int, quantity: int, category: Optional[str] = None) -> bool:
-        """Evaluate if this rule matches the given conditions."""
-        for key, condition in self.conditions.items():
-            if key == "days_to_expiry":
-                if not self._evaluate_numeric(days_to_expiry, condition):
-                    return False
-            elif key == "quantity":
-                if not self._evaluate_numeric(quantity, condition):
-                    return False
-            elif key == "category":
-                if category and category.lower() != condition.lower():
-                    return False
-        return True
-
-    def _evaluate_numeric(self, value: int, condition: str) -> bool:
-        """Evaluate numeric conditions like '<=7', '>100', etc."""
-        condition = condition.strip()
+        self.condition = condition
+        self.discount = discount
+        self.priority = priority
+    
+    def evaluate(self, days_to_expiry: int, quantity: int) -> bool:
+        """
+        Evaluate if this rule matches the given conditions.
         
-        if condition.startswith("<="):
-            return value <= int(condition[2:])
-        elif condition.startswith(">="):
-            return value >= int(condition[2:])
-        elif condition.startswith("<"):
-            return value < int(condition[1:])
-        elif condition.startswith(">"):
-            return value > int(condition[1:])
-        elif condition.startswith("=="):
-            return value == int(condition[2:])
-        else:
-            # Default to equality
-            return value == int(condition)
-
-    def __repr__(self):
-        return f"<DiscountRule(name='{self.name}', discount={self.discount_pct}%)>"
+        Args:
+            days_to_expiry: Number of days until the batch expires
+            quantity: Current quantity in the batch
+            
+        Returns:
+            True if rule conditions are met, False otherwise
+        """
+        # Evaluate days_to_expiry conditions
+        if "days_to_expiry" in self.condition:
+            dte_cond = self.condition["days_to_expiry"]
+            
+            if isinstance(dte_cond, dict):
+                # Handle range conditions (lte, gte, gt, lt)
+                if "lte" in dte_cond and days_to_expiry > dte_cond["lte"]:
+                    return False
+                if "gte" in dte_cond and days_to_expiry < dte_cond["gte"]:
+                    return False
+                if "gt" in dte_cond and days_to_expiry <= dte_cond["gt"]:
+                    return False
+                if "lt" in dte_cond and days_to_expiry >= dte_cond["lt"]:
+                    return False
+            else:
+                # Exact match
+                if days_to_expiry != dte_cond:
+                    return False
+        
+        # Evaluate quantity conditions
+        if "quantity" in self.condition:
+            qty_cond = self.condition["quantity"]
+            
+            if isinstance(qty_cond, dict):
+                if "lte" in qty_cond and quantity > qty_cond["lte"]:
+                    return False
+                if "gte" in qty_cond and quantity < qty_cond["gte"]:
+                    return False
+                if "gt" in qty_cond and quantity <= qty_cond["gt"]:
+                    return False
+                if "lt" in qty_cond and quantity >= qty_cond["lt"]:
+                    return False
+            else:
+                if quantity != qty_cond:
+                    return False
+        
+        return True
 
 
 class DiscountEngine:
     """
-    Core discount calculation engine.
+    Core discount computation engine.
     
-    Loads rules from configuration and computes optimal pricing
-    based on expiry dates, inventory levels, and other factors.
+    Loads rules from YAML configuration and applies them to inventory batches
+    to compute optimal discount percentages and prices.
     """
     
     def __init__(self, config_path: Optional[str] = None):
-        """Initialize the discount engine with rules configuration."""
+        """
+        Initialize the discount engine.
+        
+        Args:
+            config_path: Path to discount rules YAML file. If None, uses default.
+        """
         if config_path is None:
             config_path = Path(__file__).parent.parent / "config" / "discount_rules.yaml"
         
         self.config_path = Path(config_path)
-        self.config = self._load_config()
-        self.global_settings = self.config.get("global", {})
-        self.rules = self._parse_rules(self.config.get("rules", []))
-        self.category_rules = self._parse_category_rules(self.config.get("category_rules", {}))
-
-    def _load_config(self) -> Dict:
+        self.rules: List[DiscountRule] = []
+        self.defaults: Dict = {}
+        self.category_overrides: Dict = {}
+        
+        self._load_rules()
+    
+    def _load_rules(self):
         """Load discount rules from YAML configuration file."""
         try:
-            with open(self.config_path, "r") as f:
-                return yaml.safe_load(f)
-        except FileNotFoundError:
-            print(f"⚠️  Warning: Config file not found at {self.config_path}")
-            return {"global": {}, "rules": []}
+            with open(self.config_path, 'r') as f:
+                config = yaml.safe_load(f)
+            
+            # Load default settings
+            self.defaults = config.get('defaults', {})
+            
+            # Load general rules
+            for rule_data in config.get('rules', []):
+                rule = DiscountRule(
+                    name=rule_data['name'],
+                    condition=rule_data['condition'],
+                    discount=rule_data['discount'],
+                    priority=rule_data.get('priority', 999)
+                )
+                self.rules.append(rule)
+            
+            # Sort rules by priority (lower number = higher priority)
+            self.rules.sort(key=lambda r: r.priority)
+            
+            # Load category-specific overrides
+            self.category_overrides = config.get('category_overrides', {})
+            
+            logger.info(f"Loaded {len(self.rules)} discount rules from {self.config_path}")
+            
         except Exception as e:
-            print(f"❌ Error loading config: {e}")
-            return {"global": {}, "rules": []}
-
-    def _parse_rules(self, rules_config: List[Dict]) -> List[DiscountRule]:
-        """Parse rules configuration into DiscountRule objects."""
-        rules = []
-        for rule_data in rules_config:
-            rule = DiscountRule(
-                name=rule_data.get("name", "Unnamed Rule"),
-                conditions=rule_data.get("conditions", {}),
-                discount_pct=rule_data.get("discount_pct", 0.0),
-                price_floor=rule_data.get("price_floor", self.global_settings.get("default_price_floor", 0.3)),
-                description=rule_data.get("description"),
-            )
-            rules.append(rule)
-        return rules
-
-    def _parse_category_rules(self, category_config: Dict) -> Dict[str, List[DiscountRule]]:
-        """Parse category-specific rules."""
-        category_rules = {}
-        for category, data in category_config.items():
-            category_rules[category.lower()] = self._parse_rules(data.get("rules", []))
-        return category_rules
-
+            logger.error(f"Failed to load discount rules: {e}")
+            raise
+    
+    def _get_rules_for_category(self, category: Optional[str]) -> List[DiscountRule]:
+        """Get rules applicable for a specific category."""
+        if category and category in self.category_overrides:
+            override = self.category_overrides[category]
+            if 'rules' in override:
+                # Use category-specific rules
+                category_rules = []
+                for rule_data in override['rules']:
+                    rule = DiscountRule(
+                        name=rule_data['name'],
+                        condition=rule_data['condition'],
+                        discount=rule_data['discount'],
+                        priority=rule_data.get('priority', 999)
+                    )
+                    category_rules.append(rule)
+                category_rules.sort(key=lambda r: r.priority)
+                return category_rules
+        
+        # Return general rules
+        return self.rules
+    
+    def _get_price_floor_multiplier(self, category: Optional[str]) -> float:
+        """Get price floor multiplier for a category."""
+        if category and category in self.category_overrides:
+            override = self.category_overrides[category]
+            if 'price_floor_multiplier' in override:
+                return override['price_floor_multiplier']
+        
+        return self.defaults.get('price_floor_multiplier', 0.20)
+    
     def compute_batch_price(
         self,
         base_price: Decimal,
-        days_to_expiry: int,
+        expiry_date: date,
         quantity: int,
         category: Optional[str] = None,
-        min_price_floor: Optional[float] = None,
+        min_price: Optional[Decimal] = None
     ) -> Tuple[Decimal, Decimal, str]:
         """
-        Compute the optimal price for a batch based on rules.
+        Compute discounted price for an inventory batch based on rules.
         
         Args:
-            base_price: Original price of the product
-            days_to_expiry: Number of days until expiry
-            quantity: Current inventory quantity
-            category: Product category (optional)
-            min_price_floor: Minimum price as fraction of base_price (optional override)
-        
+            base_price: Original/base price of the product
+            expiry_date: Expiry date of the batch
+            quantity: Current quantity in the batch
+            category: Product category (for category-specific rules)
+            min_price: Optional minimum price override
+            
         Returns:
-            Tuple of (computed_price, discount_percentage, rule_name)
+            Tuple of (computed_price, discount_percentage, reason)
+            - computed_price: Final price after discount
+            - discount_percentage: Discount as decimal (0.30 = 30%)
+            - reason: Explanation of which rule was applied
         """
-        # Determine which rules to use
-        applicable_rules = self.rules
-        if category and category.lower() in self.category_rules:
-            # Category-specific rules take precedence
-            applicable_rules = self.category_rules[category.lower()] + self.rules
-
+        # Calculate days to expiry
+        days_to_expiry = (expiry_date - date.today()).days
+        
+        # If already expired, apply maximum discount
+        if days_to_expiry < 0:
+            max_discount = self.defaults.get('max_discount', 0.80)
+            computed_price = base_price * Decimal(1 - max_discount)
+            return computed_price, Decimal(max_discount), "expired"
+        
+        # Get applicable rules for this category
+        rules = self._get_rules_for_category(category)
+        
         # Find first matching rule
         matched_rule = None
-        for rule in applicable_rules:
-            if rule.evaluate(days_to_expiry, quantity, category):
+        for rule in rules:
+            if rule.evaluate(days_to_expiry, quantity):
                 matched_rule = rule
                 break
-
-        # No matching rule - return base price
-        if not matched_rule:
-            return base_price, Decimal("0.0"), "No Discount"
-
-        # Calculate discounted price
-        discount_pct = Decimal(str(matched_rule.discount_pct))
-        discount_multiplier = Decimal("1.0") - (discount_pct / Decimal("100.0"))
-        computed_price = base_price * discount_multiplier
-
-        # Apply price floor
-        price_floor = min_price_floor if min_price_floor is not None else matched_rule.price_floor
-        min_price = base_price * Decimal(str(price_floor))
         
-        if computed_price < min_price:
-            computed_price = min_price
-            # Recalculate actual discount percentage
-            discount_pct = ((base_price - computed_price) / base_price * Decimal("100.0"))
-
-        # Ensure discount is within global bounds
-        min_discount = Decimal(str(self.global_settings.get("min_discount_pct", 0.0)))
-        max_discount = Decimal(str(self.global_settings.get("max_discount_pct", 80.0)))
-        discount_pct = max(min_discount, min(discount_pct, max_discount))
-
-        # Round to 2 decimal places
-        computed_price = computed_price.quantize(Decimal("0.01"))
-        discount_pct = discount_pct.quantize(Decimal("0.01"))
-
-        return computed_price, discount_pct, matched_rule.name
-
-    def calculate_days_to_expiry(self, expiry_date: date) -> int:
-        """Calculate days remaining until expiry."""
-        today = date.today()
-        delta = expiry_date - today
-        return delta.days
-
-    def get_applicable_rules(
+        # Apply discount
+        if matched_rule:
+            discount_pct = Decimal(str(matched_rule.discount))
+            discount_pct = self._clamp_discount(discount_pct)
+            computed_price = base_price * (Decimal('1.0') - discount_pct)
+            reason = matched_rule.name
+        else:
+            # No rule matched - use minimum discount
+            discount_pct = Decimal(str(self.defaults.get('min_discount', 0.0)))
+            computed_price = base_price
+            reason = "no_rule_matched"
+        
+        # Apply price floor
+        if min_price is None:
+            floor_multiplier = Decimal(str(self._get_price_floor_multiplier(category)))
+            min_price = base_price * floor_multiplier
+        
+        computed_price = max(computed_price, min_price)
+        
+        # Recalculate actual discount based on final price
+        actual_discount = (base_price - computed_price) / base_price
+        
+        logger.debug(
+            f"Computed price for batch: base={base_price}, days={days_to_expiry}, "
+            f"qty={quantity}, discount={actual_discount:.2%}, price={computed_price}, "
+            f"reason={reason}"
+        )
+        
+        return computed_price, actual_discount, reason
+    
+    def _clamp_discount(self, discount: Decimal) -> Decimal:
+        """Clamp discount percentage to configured min/max bounds."""
+        min_discount = Decimal(str(self.defaults.get('min_discount', 0.0)))
+        max_discount = Decimal(str(self.defaults.get('max_discount', 0.80)))
+        
+        return max(min_discount, min(discount, max_discount))
+    
+    def preview_discount(
         self,
         days_to_expiry: int,
         quantity: int,
-        category: Optional[str] = None,
-    ) -> List[DiscountRule]:
-        """Get all rules that would apply to given conditions."""
-        applicable_rules = []
+        category: Optional[str] = None
+    ) -> Tuple[float, str]:
+        """
+        Preview what discount would be applied for given conditions.
         
-        # Check general rules
-        for rule in self.rules:
-            if rule.evaluate(days_to_expiry, quantity, category):
-                applicable_rules.append(rule)
+        Useful for testing and UI previews without actual price calculation.
         
-        # Check category-specific rules
-        if category and category.lower() in self.category_rules:
-            for rule in self.category_rules[category.lower()]:
-                if rule.evaluate(days_to_expiry, quantity, category):
-                    applicable_rules.append(rule)
+        Args:
+            days_to_expiry: Days until expiry
+            quantity: Batch quantity
+            category: Product category
+            
+        Returns:
+            Tuple of (discount_percentage, rule_name)
+        """
+        rules = self._get_rules_for_category(category)
         
-        return applicable_rules
-
-    def reload_config(self):
-        """Reload configuration from file."""
-        self.config = self._load_config()
-        self.global_settings = self.config.get("global", {})
-        self.rules = self._parse_rules(self.config.get("rules", []))
-        self.category_rules = self._parse_category_rules(self.config.get("category_rules", {}))
-        print("✅ Discount rules reloaded")
+        for rule in rules:
+            if rule.evaluate(days_to_expiry, quantity):
+                return rule.discount, rule.name
+        
+        return self.defaults.get('min_discount', 0.0), "no_rule_matched"
+    
+    def reload_rules(self):
+        """Reload rules from configuration file."""
+        self.rules.clear()
+        self.defaults.clear()
+        self.category_overrides.clear()
+        self._load_rules()
+        logger.info("Discount rules reloaded")
 
 
 # Global discount engine instance
-_discount_engine: Optional[DiscountEngine] = None
+_engine_instance: Optional[DiscountEngine] = None
 
 
 def get_discount_engine() -> DiscountEngine:
     """Get or create the global discount engine instance."""
-    global _discount_engine
-    if _discount_engine is None:
-        _discount_engine = DiscountEngine()
-    return _discount_engine
-
-
-# Convenience function for direct use
-def compute_batch_price(
-    base_price: Decimal,
-    days_to_expiry: int,
-    quantity: int,
-    category: Optional[str] = None,
-    min_price_floor: Optional[float] = None,
-) -> Tuple[Decimal, Decimal, str]:
-    """
-    Compute batch price using the global discount engine.
-    
-    This is a convenience wrapper around DiscountEngine.compute_batch_price().
-    """
-    engine = get_discount_engine()
-    return engine.compute_batch_price(
-        base_price=base_price,
-        days_to_expiry=days_to_expiry,
-        quantity=quantity,
-        category=category,
-        min_price_floor=min_price_floor,
-    )
+    global _engine_instance
+    if _engine_instance is None:
+        _engine_instance = DiscountEngine()
+    return _engine_instance

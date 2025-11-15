@@ -1,7 +1,7 @@
 """
-Discount Service
+Discount Service Layer
 
-Business logic for calculating and applying discounts to inventory batches.
+Handles batch discount computation, persistence, and retrieval.
 Integrates the discount engine with database operations.
 """
 
@@ -10,275 +10,242 @@ from datetime import datetime, date
 from decimal import Decimal
 
 from app.core.database import prisma
-from app.core.discount_engine import get_discount_engine, compute_batch_price
+from app.core.discount_engine import get_discount_engine
 from app.schemas.discount import (
     BatchDiscountCreate,
     BatchDiscountResponse,
     DiscountCalculationResponse,
 )
+from app.services.inventory_service import InventoryService
+from app.services.product_service import ProductService
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DiscountService:
-    """Service for discount calculation and management."""
+    """Service layer for discount operations."""
 
     @staticmethod
-    async def calculate_batch_discount(
+    async def compute_and_save_discount(
         batch_id: int,
-        use_ml_recommendation: bool = False,
+        use_ml_recommendation: bool = False
     ) -> DiscountCalculationResponse:
         """
-        Calculate discount for a specific batch.
+        Compute discount for a batch and save it to database.
         
         Args:
-            batch_id: ID of the inventory batch
-            use_ml_recommendation: Whether to use ML model (future feature)
-        
+            batch_id: Inventory batch ID
+            use_ml_recommendation: Whether to use ML model (future enhancement)
+            
         Returns:
-            DiscountCalculationResponse with pricing details
+            DiscountCalculationResponse with computed pricing details
         """
-        # Fetch batch with product details
+        # Get batch with product info
         batch = await prisma.inventorybatch.find_unique(
             where={"id": batch_id},
-            include={"product": True},
+            include={"product": True}
         )
         
-        if not batch or not batch.product:
+        if not batch:
             raise ValueError(f"Batch with ID {batch_id} not found")
-
-        # Calculate days to expiry
-        days_to_expiry = (batch.expiryDate - date.today()).days
         
-        # Get base price from product
-        base_price = batch.product.basePrice
+        if not batch.product:
+            raise ValueError(f"Product not found for batch {batch_id}")
         
-        # Compute discount using engine
-        computed_price, discount_pct, rule_name = compute_batch_price(
-            base_price=base_price,
-            days_to_expiry=days_to_expiry,
+        # Get discount engine
+        engine = get_discount_engine()
+        
+        # Compute discount
+        computed_price, discount_pct, reason = engine.compute_batch_price(
+            base_price=batch.product.basePrice,
+            expiry_date=batch.expiryDate,
             quantity=batch.quantity,
-            category=batch.product.category,
+            category=batch.product.category
         )
         
-        return DiscountCalculationResponse(
-            batch_id=batch_id,
-            original_price=base_price,
-            discount_pct=discount_pct,
-            discounted_price=computed_price,
-            days_to_expiry=days_to_expiry,
-            ml_recommended=use_ml_recommendation,
-            reason=rule_name,
-        )
-
-    @staticmethod
-    async def apply_discount_to_batch(
-        batch_id: int,
-        use_ml_recommendation: bool = False,
-        valid_until: Optional[datetime] = None,
-    ) -> BatchDiscountResponse:
-        """
-        Calculate and persist discount for a batch.
-        
-        Args:
-            batch_id: ID of the inventory batch
-            use_ml_recommendation: Whether to use ML model
-            valid_until: When this discount expires (optional)
-        
-        Returns:
-            BatchDiscountResponse with saved discount
-        """
-        # Calculate discount
-        calc_result = await DiscountService.calculate_batch_discount(
-            batch_id=batch_id,
-            use_ml_recommendation=use_ml_recommendation,
-        )
+        days_to_expiry = (batch.expiryDate - date.today()).days
         
         # Create discount record
         discount = await prisma.batchdiscount.create(
             data={
                 "batchId": batch_id,
-                "computedPrice": calc_result.discounted_price,
-                "discountPct": calc_result.discount_pct,
-                "validTo": valid_until,
+                "computedPrice": computed_price,
+                "discountPct": discount_pct,
+                "validFrom": datetime.now(),
                 "mlRecommended": use_ml_recommendation,
             }
         )
         
-        return BatchDiscountResponse.model_validate(discount)
-
-    @staticmethod
-    async def calculate_all_expiring_discounts(
-        days_threshold: int = 30,
-        auto_apply: bool = False,
-    ) -> List[DiscountCalculationResponse]:
-        """
-        Calculate discounts for all batches expiring within threshold.
-        
-        Args:
-            days_threshold: Number of days to look ahead
-            auto_apply: Whether to automatically save discounts to database
-        
-        Returns:
-            List of discount calculations
-        """
-        from datetime import timedelta
-        
-        threshold_date = date.today() + timedelta(days=days_threshold)
-        
-        # Get expiring batches
-        batches = await prisma.inventorybatch.find_many(
-            where={
-                "expiryDate": {"lte": threshold_date},
-                "quantity": {"gt": 0},
-            },
-            include={"product": True},
+        logger.info(
+            f"Created discount for batch {batch_id}: "
+            f"{discount_pct:.2%} off, price={computed_price}, reason={reason}"
         )
         
-        results = []
-        for batch in batches:
-            if not batch.product:
-                continue
-                
-            days_to_expiry = (batch.expiryDate - date.today()).days
-            base_price = batch.product.basePrice
-            
-            # Compute discount
-            computed_price, discount_pct, rule_name = compute_batch_price(
-                base_price=base_price,
-                days_to_expiry=days_to_expiry,
-                quantity=batch.quantity,
-                category=batch.product.category,
-            )
-            
-            result = DiscountCalculationResponse(
-                batch_id=batch.id,
-                original_price=base_price,
-                discount_pct=discount_pct,
-                discounted_price=computed_price,
-                days_to_expiry=days_to_expiry,
-                ml_recommended=False,
-                reason=rule_name,
-            )
-            results.append(result)
-            
-            # Auto-apply if requested
-            if auto_apply and discount_pct > 0:
-                await DiscountService.apply_discount_to_batch(
-                    batch_id=batch.id,
-                    use_ml_recommendation=False,
-                )
-        
-        return results
-
+        return DiscountCalculationResponse(
+            batch_id=batch_id,
+            original_price=batch.product.basePrice,
+            discount_pct=discount_pct,
+            discounted_price=computed_price,
+            days_to_expiry=days_to_expiry,
+            ml_recommended=use_ml_recommendation,
+            reason=reason
+        )
+    
     @staticmethod
-    async def get_active_discount_for_batch(batch_id: int) -> Optional[BatchDiscountResponse]:
+    async def compute_all_batch_discounts(
+        expiring_only: bool = True,
+        days_threshold: int = 30
+    ) -> List[DiscountCalculationResponse]:
+        """
+        Compute discounts for multiple batches.
+        
+        Args:
+            expiring_only: Only process batches expiring within threshold
+            days_threshold: Days threshold for expiry filtering
+            
+        Returns:
+            List of discount calculation results
+        """
+        # Get batches to process
+        if expiring_only:
+            from datetime import timedelta
+            threshold_date = date.today() + timedelta(days=days_threshold)
+            batches = await prisma.inventorybatch.find_many(
+                where={
+                    "expiryDate": {"lte": threshold_date},
+                    "quantity": {"gt": 0}
+                },
+                include={"product": True}
+            )
+        else:
+            batches = await prisma.inventorybatch.find_many(
+                where={"quantity": {"gt": 0}},
+                include={"product": True}
+            )
+        
+        results = []
+        engine = get_discount_engine()
+        
+        for batch in batches:
+            try:
+                if not batch.product:
+                    logger.warning(f"Skipping batch {batch.id}: no product")
+                    continue
+                
+                # Compute discount
+                computed_price, discount_pct, reason = engine.compute_batch_price(
+                    base_price=batch.product.basePrice,
+                    expiry_date=batch.expiryDate,
+                    quantity=batch.quantity,
+                    category=batch.product.category
+                )
+                
+                days_to_expiry = (batch.expiryDate - date.today()).days
+                
+                # Invalidate old discounts (set validTo to now)
+                await prisma.batchdiscount.update_many(
+                    where={
+                        "batchId": batch.id,
+                        "validTo": None
+                    },
+                    data={"validTo": datetime.now()}
+                )
+                
+                # Create new discount
+                await prisma.batchdiscount.create(
+                    data={
+                        "batchId": batch.id,
+                        "computedPrice": computed_price,
+                        "discountPct": discount_pct,
+                        "validFrom": datetime.now(),
+                        "mlRecommended": False,
+                    }
+                )
+                
+                results.append(DiscountCalculationResponse(
+                    batch_id=batch.id,
+                    original_price=batch.product.basePrice,
+                    discount_pct=discount_pct,
+                    discounted_price=computed_price,
+                    days_to_expiry=days_to_expiry,
+                    ml_recommended=False,
+                    reason=reason
+                ))
+                
+            except Exception as e:
+                logger.error(f"Error computing discount for batch {batch.id}: {e}")
+                continue
+        
+        logger.info(f"Computed discounts for {len(results)} batches")
+        return results
+    
+    @staticmethod
+    async def get_active_discount(batch_id: int) -> Optional[BatchDiscountResponse]:
         """Get the currently active discount for a batch."""
         discount = await prisma.batchdiscount.find_first(
             where={
                 "batchId": batch_id,
                 "OR": [
                     {"validTo": None},
-                    {"validTo": {"gt": datetime.now()}},
-                ],
+                    {"validTo": {"gt": datetime.now()}}
+                ]
             },
-            order={"createdAt": "desc"},
+            order={"createdAt": "desc"}
         )
         
         if not discount:
             return None
         
         return BatchDiscountResponse.model_validate(discount)
-
+    
     @staticmethod
-    async def update_batch_discount(
-        discount_id: int,
-        new_discount_pct: Optional[Decimal] = None,
-        new_valid_until: Optional[datetime] = None,
-    ) -> Optional[BatchDiscountResponse]:
-        """Update an existing discount."""
-        update_data = {}
-        
-        if new_discount_pct is not None:
-            update_data["discountPct"] = new_discount_pct
-            
-            # Recalculate computed price
-            discount = await prisma.batchdiscount.find_unique(
-                where={"id": discount_id},
-                include={"batch": {"include": {"product": True}}},
-            )
-            
-            if discount and discount.batch and discount.batch.product:
-                base_price = discount.batch.product.basePrice
-                computed_price = base_price * (Decimal("1.0") - new_discount_pct / Decimal("100.0"))
-                update_data["computedPrice"] = computed_price
-        
-        if new_valid_until is not None:
-            update_data["validTo"] = new_valid_until
-        
-        if not update_data:
-            return None
-        
-        updated = await prisma.batchdiscount.update(
-            where={"id": discount_id},
-            data=update_data,
+    async def get_batch_discount_history(
+        batch_id: int,
+        limit: int = 10
+    ) -> List[BatchDiscountResponse]:
+        """Get discount history for a batch."""
+        discounts = await prisma.batchdiscount.find_many(
+            where={"batchId": batch_id},
+            order={"createdAt": "desc"},
+            take=limit
         )
         
-        return BatchDiscountResponse.model_validate(updated)
-
+        return [BatchDiscountResponse.model_validate(d) for d in discounts]
+    
     @staticmethod
-    async def invalidate_discount(discount_id: int) -> bool:
-        """Mark a discount as invalid by setting validTo to now."""
-        try:
-            await prisma.batchdiscount.update(
-                where={"id": discount_id},
-                data={"validTo": datetime.now()},
-            )
-            return True
-        except Exception:
-            return False
-
-    @staticmethod
-    async def get_product_best_price(product_id: int) -> Optional[Decimal]:
+    async def preview_discount(
+        batch_id: int
+    ) -> DiscountCalculationResponse:
         """
-        Get the best (lowest) available price for a product across all batches.
+        Preview what discount would be applied without saving.
         
-        Returns the lowest discounted price from batches with active discounts,
-        or base price if no discounts are active.
+        Useful for testing and UI previews.
         """
-        batches = await prisma.inventorybatch.find_many(
-            where={
-                "productId": product_id,
-                "quantity": {"gt": 0},
-            },
-            include={
-                "product": True,
-                "batchDiscounts": {
-                    "where": {
-                        "OR": [
-                            {"validTo": None},
-                            {"validTo": {"gt": datetime.now()}},
-                        ],
-                    },
-                    "order_by": {"discountPct": "desc"},
-                    "take": 1,
-                },
-            },
+        batch = await prisma.inventorybatch.find_unique(
+            where={"id": batch_id},
+            include={"product": True}
         )
         
-        if not batches:
-            return None
+        if not batch or not batch.product:
+            raise ValueError(f"Batch {batch_id} not found")
         
-        best_price = None
-        for batch in batches:
-            if batch.batchDiscounts:
-                # Use discounted price
-                price = batch.batchDiscounts[0].computedPrice
-            elif batch.product:
-                # Use base price
-                price = batch.product.basePrice
-            else:
-                continue
-            
-            if best_price is None or price < best_price:
-                best_price = price
+        engine = get_discount_engine()
+        computed_price, discount_pct, reason = engine.compute_batch_price(
+            base_price=batch.product.basePrice,
+            expiry_date=batch.expiryDate,
+            quantity=batch.quantity,
+            category=batch.product.category
+        )
         
-        return best_price
+        days_to_expiry = (batch.expiryDate - date.today()).days
+        
+        return DiscountCalculationResponse(
+            batch_id=batch_id,
+            original_price=batch.product.basePrice,
+            discount_pct=discount_pct,
+            discounted_price=computed_price,
+            days_to_expiry=days_to_expiry,
+            ml_recommended=False,
+            reason=reason
+        )

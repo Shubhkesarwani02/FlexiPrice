@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from fastapi import APIRouter, HTTPException, status, Query
 
 from app.schemas.discount import (
@@ -12,147 +12,131 @@ router = APIRouter()
 
 
 @router.post(
-    "/calculate",
+    "/compute/{batch_id}",
     response_model=DiscountCalculationResponse,
-    summary="Calculate discount for a batch",
+    summary="Compute discount for a specific batch",
 )
-async def calculate_discount(request: DiscountCalculationRequest):
-    """
-    Calculate the optimal discount for a specific inventory batch.
-    
-    This endpoint computes the discount based on:
-    - Days to expiry
-    - Current inventory quantity
-    - Product category
-    - Configured discount rules
-    
-    Does not persist the discount to the database.
-    """
-    try:
-        return await DiscountService.calculate_batch_discount(
-            batch_id=request.batch_id,
-            use_ml_recommendation=request.use_ml_recommendation,
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to calculate discount: {str(e)}",
-        )
-
-
-@router.post(
-    "/apply/{batch_id}",
-    response_model=BatchDiscountResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Calculate and apply discount to batch",
-)
-async def apply_discount(
+async def compute_batch_discount(
     batch_id: int,
     use_ml: bool = Query(False, description="Use ML recommendation"),
 ):
     """
-    Calculate and persist discount for a batch.
+    Compute and save discount for a specific inventory batch.
     
-    This endpoint:
-    1. Calculates the optimal discount
-    2. Saves it to the database
-    3. Returns the discount record
+    This applies the discount rules engine to calculate the optimal discount
+    based on expiry date, quantity, and category.
+    
+    - **batch_id**: ID of the inventory batch
+    - **use_ml**: Whether to use ML recommendations (future feature)
     """
     try:
-        return await DiscountService.apply_discount_to_batch(
+        return await DiscountService.compute_and_save_discount(
             batch_id=batch_id,
-            use_ml_recommendation=use_ml,
+            use_ml_recommendation=use_ml
         )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
+            detail=str(e)
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to apply discount: {str(e)}",
+            detail=f"Failed to compute discount: {str(e)}"
         )
 
 
 @router.post(
-    "/calculate-all",
+    "/compute-all",
     response_model=List[DiscountCalculationResponse],
-    summary="Calculate discounts for all expiring batches",
+    summary="Compute discounts for all eligible batches",
 )
-async def calculate_all_discounts(
-    days_threshold: int = Query(30, ge=1, le=365, description="Days until expiry threshold"),
-    auto_apply: bool = Query(False, description="Automatically save discounts to database"),
+async def compute_all_discounts(
+    expiring_only: bool = Query(True, description="Only process expiring batches"),
+    days_threshold: int = Query(30, ge=1, le=365, description="Days threshold for expiry"),
 ):
     """
-    Calculate discounts for all batches expiring within the threshold.
+    Compute and save discounts for all eligible inventory batches.
     
-    Use this for:
-    - Preview discounts before applying
-    - Batch discount calculations
-    - Scheduled discount updates
+    This is typically run on a schedule to keep discounts up-to-date.
     
-    Set `auto_apply=true` to automatically save discounts.
+    - **expiring_only**: If true, only process batches expiring within threshold
+    - **days_threshold**: Number of days threshold for expiry filtering
     """
     try:
-        return await DiscountService.calculate_all_expiring_discounts(
-            days_threshold=days_threshold,
-            auto_apply=auto_apply,
+        return await DiscountService.compute_all_batch_discounts(
+            expiring_only=expiring_only,
+            days_threshold=days_threshold
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to calculate discounts: {str(e)}",
+            detail=f"Failed to compute discounts: {str(e)}"
         )
 
 
 @router.get(
-    "/batch/{batch_id}/active",
-    response_model=Optional[BatchDiscountResponse],
-    summary="Get active discount for batch",
+    "/preview/{batch_id}",
+    response_model=DiscountCalculationResponse,
+    summary="Preview discount without saving",
+)
+async def preview_batch_discount(batch_id: int):
+    """
+    Preview what discount would be applied to a batch without saving.
+    
+    Useful for testing and UI previews.
+    """
+    try:
+        return await DiscountService.preview_discount(batch_id=batch_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to preview discount: {str(e)}"
+        )
+
+
+@router.get(
+    "/active/{batch_id}",
+    response_model=BatchDiscountResponse,
+    summary="Get active discount for a batch",
 )
 async def get_active_discount(batch_id: int):
     """
     Get the currently active discount for a batch.
-    
-    Returns the most recent discount that hasn't expired yet.
+    """
+    discount = await DiscountService.get_active_discount(batch_id=batch_id)
+    if not discount:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No active discount found for batch {batch_id}"
+        )
+    return discount
+
+
+@router.get(
+    "/history/{batch_id}",
+    response_model=List[BatchDiscountResponse],
+    summary="Get discount history for a batch",
+)
+async def get_discount_history(
+    batch_id: int,
+    limit: int = Query(10, ge=1, le=100, description="Number of records to return"),
+):
+    """
+    Get discount history for a batch, showing how discounts have changed over time.
     """
     try:
-        discount = await DiscountService.get_active_discount_for_batch(batch_id)
-        if not discount:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No active discount found for batch {batch_id}",
-            )
-        return discount
-    except HTTPException:
-        raise
+        return await DiscountService.get_batch_discount_history(
+            batch_id=batch_id,
+            limit=limit
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve discount: {str(e)}",
-        )
-
-
-@router.delete(
-    "/{discount_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Invalidate a discount",
-)
-async def invalidate_discount(discount_id: int):
-    """
-    Mark a discount as invalid by setting its expiry to now.
-    
-    This effectively removes the discount from active use.
-    """
-    success = await DiscountService.invalidate_discount(discount_id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Discount with ID {discount_id} not found",
+            detail=f"Failed to retrieve discount history: {str(e)}"
         )

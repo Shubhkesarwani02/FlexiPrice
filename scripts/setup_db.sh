@@ -32,12 +32,8 @@ echo "Step 4: Generating Prisma Client..."
 prisma generate
 
 echo ""
-echo "Step 5: Creating initial Alembic migration..."
-alembic revision --autogenerate -m "Initial migration - create all tables"
-
-echo ""
-echo "Step 6: Applying migrations..."
-alembic upgrade head
+echo "Step 5: Pushing Prisma schema to database..."
+prisma db push
 
 echo ""
 echo "✅ Database setup complete!"

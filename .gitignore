@@ -54,9 +54,6 @@ htmlcov/
 .pytest_cache/
 .tox/
 
-# Alembic
-alembic/versions/*.pyc
-
 # ML Models
 *.pkl
 *.joblib

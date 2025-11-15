@@ -17,12 +17,19 @@ class InventoryService:
     @staticmethod
     async def create_batch(batch_data: InventoryBatchCreate) -> InventoryBatchResponse:
         """Create a new inventory batch."""
+        # Convert date to datetime for Prisma if needed
+        expiry_date = batch_data.expiry_date
+        if isinstance(expiry_date, date) and not isinstance(expiry_date, datetime):
+            expiry_datetime = datetime.combine(expiry_date, datetime.min.time())
+        else:
+            expiry_datetime = expiry_date
+            
         batch = await prisma.inventorybatch.create(
             data={
                 "productId": batch_data.product_id,
                 "batchCode": batch_data.batch_code,
                 "quantity": batch_data.quantity,
-                "expiryDate": batch_data.expiry_date,
+                "expiryDate": expiry_datetime,
             }
         )
         return InventoryBatchResponse.model_validate(batch)
@@ -74,7 +81,10 @@ class InventoryService:
             batch_dict = batch.model_dump()
             
             # Calculate days to expiry
-            days_to_expiry = (batch.expiryDate - date.today()).days
+            expiry_date = batch.expiryDate
+            if isinstance(expiry_date, datetime):
+                expiry_date = expiry_date.date()
+            days_to_expiry = (expiry_date - date.today()).days
             
             # Get current discount if available
             current_discount_pct = None

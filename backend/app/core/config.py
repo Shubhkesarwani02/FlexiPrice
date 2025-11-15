@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     MIN_DISCOUNT_PCT: float = 5.0
     MAX_DISCOUNT_PCT: float = 80.0
     EXPIRY_THRESHOLD_DAYS: int = 30
+    DISCOUNT_RULES_PATH: str = "./config/discount_rules.yaml"
+    PRICE_FLOOR_MULTIPLIER: float = 0.20  # Minimum price = 20% of base price
     
     class Config:
         env_file = ".env"

@@ -7,10 +7,12 @@ from typing import Optional
 # Inventory Batch Schemas
 class InventoryBatchBase(BaseModel):
     """Base inventory batch schema."""
-    product_id: int = Field(..., gt=0, description="Product ID")
-    batch_code: Optional[str] = Field(None, max_length=100, description="Batch identification code")
+    product_id: int = Field(..., gt=0, description="Product ID", alias="productId")
+    batch_code: Optional[str] = Field(None, max_length=100, description="Batch identification code", alias="batchCode")
     quantity: int = Field(..., gt=0, description="Quantity in this batch")
-    expiry_date: date = Field(..., description="Expiry date of this batch")
+    expiry_date: date = Field(..., description="Expiry date of this batch", alias="expiryDate")
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class InventoryBatchCreate(InventoryBatchBase):
@@ -28,10 +30,10 @@ class InventoryBatchUpdate(BaseModel):
 class InventoryBatchResponse(InventoryBatchBase):
     """Schema for inventory batch response."""
     id: int
-    created_at: datetime
-    updated_at: Optional[datetime] = None
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: Optional[datetime] = Field(None, alias="updatedAt")
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class InventoryBatchWithProductResponse(InventoryBatchResponse):

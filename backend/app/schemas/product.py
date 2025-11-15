@@ -11,7 +11,9 @@ class ProductBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255, description="Product name")
     description: Optional[str] = Field(None, description="Product description")
     category: Optional[str] = Field(None, max_length=100, description="Product category")
-    base_price: Decimal = Field(..., gt=0, description="Base price of the product")
+    base_price: Decimal = Field(..., gt=0, description="Base price of the product", alias="basePrice")
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class ProductCreate(ProductBase):
@@ -30,10 +32,10 @@ class ProductUpdate(BaseModel):
 class ProductResponse(ProductBase):
     """Schema for product response."""
     id: int
-    created_at: datetime
-    updated_at: Optional[datetime] = None
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: Optional[datetime] = Field(None, alias="updatedAt")
     
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class ProductWithDiscountResponse(ProductResponse):

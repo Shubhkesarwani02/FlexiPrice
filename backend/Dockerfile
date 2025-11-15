@@ -22,6 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . /app
 
+# Generate Prisma client
+RUN python -m prisma py fetch && python -m prisma db push --skip-generate || true
+RUN prisma generate || echo "Prisma generate skipped"
+
 # Expose port
 EXPOSE 8000
 

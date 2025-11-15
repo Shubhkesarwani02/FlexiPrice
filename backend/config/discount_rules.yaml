@@ -1,0 +1,80 @@
+# Discount Rules Configuration for FlexiPrice
+# These rules determine discount percentages based on days to expiry and inventory levels
+
+rules:
+  # Critical expiry - heavy discount to move stock quickly
+  - name: "Critical Expiry (2 days or less)"
+    condition:
+      days_to_expiry: {"lte": 2}
+    discount: 0.60  # 60% off
+    priority: 1
+
+  # Near expiry - significant discount
+  - name: "Near Expiry (3-7 days)"
+    condition:
+      days_to_expiry: {"lte": 7, "gt": 2}
+    discount: 0.30  # 30% off
+    priority: 2
+
+  # Medium expiry with high inventory
+  - name: "Medium Expiry + High Inventory"
+    condition:
+      days_to_expiry: {"lte": 30, "gt": 7}
+      quantity: {"gt": 100}
+    discount: 0.15  # 15% off
+    priority: 3
+
+  # Medium expiry normal
+  - name: "Medium Expiry (8-30 days)"
+    condition:
+      days_to_expiry: {"lte": 30, "gt": 7}
+    discount: 0.10  # 10% off
+    priority: 4
+
+  # Far expiry with very high inventory
+  - name: "Far Expiry + Very High Inventory"
+    condition:
+      days_to_expiry: {"gt": 30}
+      quantity: {"gt": 200}
+    discount: 0.05  # 5% off
+    priority: 5
+
+# Default settings
+defaults:
+  # Minimum discount percentage (never go below this even if no rules match)
+  min_discount: 0.0
+  
+  # Maximum discount percentage (cap to prevent extreme discounts)
+  max_discount: 0.80
+  
+  # Price floor multiplier (computed price should not go below this percentage of base price)
+  price_floor_multiplier: 0.20  # 20% of base price minimum
+  
+  # Enable ML recommendations to override rules
+  enable_ml_override: true
+  
+  # ML confidence threshold to accept recommendations
+  ml_confidence_threshold: 0.75
+
+# Category-specific overrides (optional)
+category_overrides:
+  "Dairy":
+    rules:
+      - name: "Dairy Critical Expiry"
+        condition:
+          days_to_expiry: {"lte": 1}
+        discount: 0.70
+        priority: 1
+    price_floor_multiplier: 0.30
+  
+  "Bakery":
+    rules:
+      - name: "Bakery Same Day"
+        condition:
+          days_to_expiry: {"lte": 1}
+        discount: 0.50
+        priority: 1
+    price_floor_multiplier: 0.25
+  
+  "Meat":
+    price_floor_multiplier: 0.40  # Higher floor for premium products

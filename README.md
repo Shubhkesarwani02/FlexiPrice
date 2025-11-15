@@ -18,12 +18,11 @@ FlexiPrice/
 ├── backend/              # FastAPI application
 │   ├── app/
 │   │   ├── main.py      # FastAPI entry point
-│   │   ├── models/      # SQLAlchemy models
 │   │   ├── schemas/     # Pydantic schemas
 │   │   ├── api/         # API routes
 │   │   ├── core/        # Core configuration
 │   │   └── services/    # Business logic
-│   ├── alembic/         # Database migrations
+│   ├── prisma/          # Prisma schema
 │   ├── tests/           # Backend tests
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -120,9 +119,16 @@ Once the server is running, visit:
 - [x] Database schema & models (Prisma + SQLAlchemy)
 - [x] Product & inventory endpoints
 - [x] Admin CRUD APIs with service layer
-- [ ] Discount calculation engine
+- [x] Discount calculation engine (rule-based)
 - [ ] Celery scheduler setup
 - [ ] Basic tests
+
+## 📋 Week 2 Goals
+
+- [x] **Day 1**: Discount engine with configurable rules ✅
+- [ ] **Day 2**: Celery scheduler for auto-recomputation
+- [ ] **Day 3**: Storefront price API endpoints
+- [ ] **Day 4**: Redis caching + job monitoring
 
 ## 📝 License
 
