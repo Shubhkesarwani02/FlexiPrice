@@ -1,0 +1,33 @@
+{
+  "model_type": "XGBoost Binary Classifier",
+  "target": "Purchase Probability (sold)",
+  "num_features": 20,
+  "features": [
+    "base_price",
+    "discount_pct",
+    "days_to_expiry",
+    "inventory_level",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_summer",
+    "is_winter",
+    "is_holiday_season",
+    "season_multiplier",
+    "urgency_score",
+    "discount_per_day",
+    "inventory_risk",
+    "high_urgency",
+    "deep_discount",
+    "discount_expiry_interaction",
+    "price_discount_ratio",
+    "category_encoded",
+    "price_tier_encoded"
+  ],
+  "training_date": "2025-11-15 19:18:58",
+  "performance": {
+    "accuracy": 0.6515,
+    "roc_auc": 0.6724474968086245,
+    "f1_score": 0.477119279819955
+  }
+}

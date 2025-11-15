@@ -1,0 +1,36 @@
+{
+  "accuracy": 0.6515,
+  "precision": 0.6045627376425855,
+  "recall": 0.3940520446096654,
+  "f1_score": 0.477119279819955,
+  "roc_auc": 0.6724474968086245,
+  "confusion_matrix": [
+    [
+      985,
+      208
+    ],
+    [
+      489,
+      318
+    ]
+  ],
+  "feature_importance": {
+    "deep_discount": 112.72224426269531,
+    "discount_pct": 18.35027503967285,
+    "season_multiplier": 8.247408866882324,
+    "discount_per_day": 6.535417079925537,
+    "discount_expiry_interaction": 5.898859024047852,
+    "urgency_score": 4.530864715576172,
+    "day_of_week": 4.416090965270996,
+    "price_discount_ratio": 4.270380973815918,
+    "days_to_expiry": 4.19550085067749,
+    "inventory_level": 3.9553210735321045,
+    "month": 3.8518295288085938,
+    "category_encoded": 3.8130242824554443,
+    "is_winter": 3.7410945892333984,
+    "base_price": 3.728600025177002,
+    "is_summer": 2.810746669769287,
+    "inventory_risk": 2.496072769165039,
+    "price_tier_encoded": 2.323964834213257
+  }
+}

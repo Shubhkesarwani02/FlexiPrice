@@ -1,0 +1,22 @@
+[
+  "base_price",
+  "discount_pct",
+  "days_to_expiry",
+  "inventory_level",
+  "day_of_week",
+  "month",
+  "is_weekend",
+  "is_summer",
+  "is_winter",
+  "is_holiday_season",
+  "season_multiplier",
+  "urgency_score",
+  "discount_per_day",
+  "inventory_risk",
+  "high_urgency",
+  "deep_discount",
+  "discount_expiry_interaction",
+  "price_discount_ratio",
+  "category_encoded",
+  "price_tier_encoded"
+]
