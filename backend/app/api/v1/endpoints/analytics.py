@@ -11,6 +11,7 @@ Provides data for:
 from fastapi import APIRouter, HTTPException, Query
 from typing import List
 from decimal import Decimal
+from datetime import datetime, date, timedelta
 import pandas as pd
 from pathlib import Path
 
@@ -25,7 +26,94 @@ from app.schemas.analytics import (
 router = APIRouter()
 
 
+@router.get("", response_model=AnalyticsSummary)
+async def get_analytics_overview():
+    """
+    Get high-level analytics overview.
+    
+    Returns summary statistics including:
+    - Total products, batches, active discounts
+    - Revenue and inventory metrics
+    """
+    try:
+        # Get counts from database
+        from app.core.database import prisma
+        
+        total_products = await prisma.product.count()
+        total_batches = await prisma.inventorybatch.count()
+        
+        # Count active discounts
+        now = datetime.now()
+        active_discounts = await prisma.batchdiscount.count(
+            where={
+                "validFrom": {"lte": now},
+                "OR": [
+                    {"validTo": None},
+                    {"validTo": {"gte": now}}
+                ]
+            }
+        )
+        
+        # Calculate metrics from synthetic data if available
+        total_revenue = Decimal("0.00")
+        total_units_sold = 0
+        avg_discount_pct = Decimal("0.00")
+        
+        try:
+            df = load_synthetic_data()
+            sold_items = df[df['sold_within_window'] == True]
+            if len(sold_items) > 0:
+                total_revenue = Decimal(str(sold_items['price'].sum()))
+                total_units_sold = int(sold_items['units_sold'].sum())
+                avg_discount_pct = Decimal(str(sold_items['discount_pct'].mean()))
+        except:
+            pass
+        
+        # Count expiring soon (within 7 days)
+        from datetime import date, timedelta
+        expiring_threshold = datetime.now() + timedelta(days=7)
+        
+        products_expiring_soon = await prisma.inventorybatch.count(
+            where={
+                "expiryDate": {"lte": expiring_threshold},
+                "quantity": {"gt": 0}
+            }
+        )
+        
+        # Count products with discounts
+        batches_with_discounts = await prisma.inventorybatch.find_many(
+            where={
+                "batchDiscounts": {
+                    "some": {
+                        "validFrom": {"lte": now},
+                        "OR": [
+                            {"validTo": None},
+                            {"validTo": {"gte": now}}
+                        ]
+                    }
+                }
+            },
+            distinct=["productId"]
+        )
+        
+        products_with_discount = len(set(b.productId for b in batches_with_discounts))
+        
+        return AnalyticsSummary(
+            totalRevenue=total_revenue,
+            totalUnitsSold=total_units_sold,
+            avgDiscountPct=avg_discount_pct,
+            productsWithDiscount=products_with_discount,
+            productsExpiringSoon=products_expiring_soon
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve analytics overview: {str(e)}"
+        )
+
+
 def load_synthetic_data() -> pd.DataFrame:
+
     """Load synthetic purchase data for analytics."""
     data_path = Path(__file__).parent.parent.parent.parent.parent / "data" / "synthetic_purchases.csv"
     

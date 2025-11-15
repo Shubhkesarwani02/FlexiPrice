@@ -206,7 +206,7 @@ class MLPredictor:
         
         try:
             # Fetch product details
-            product = await prisma.product.findUnique(where={"sku": product_id})
+            product = await prisma.product.find_unique(where={"sku": product_id})
             if not product:
                 raise ValueError(f"Product {product_id} not found")
             

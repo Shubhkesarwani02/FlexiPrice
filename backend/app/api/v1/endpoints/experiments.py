@@ -27,6 +27,55 @@ from app.services.ml_predictor import ml_predictor
 router = APIRouter()
 
 
+@router.get("", response_model=List[ProductWithExperiment])
+async def list_all_experiments(
+    group_filter: Optional[str] = Query(None, description="Filter by experiment group: CONTROL or ML_VARIANT")
+):
+    """
+    List all products enrolled in experiments.
+    
+    Returns products with their experiment assignments and current status.
+    """
+    try:
+        from app.core.database import prisma
+        
+        # Build where clause - Prisma Python uses isNot for NOT NULL checks
+        if group_filter:
+            where_clause = {
+                "experimentGroup": group_filter
+            }
+        else:
+            # Get all products (return empty list if none have experiments)
+            where_clause = {}
+        
+        products = await prisma.product.find_many(
+            where=where_clause,
+            include={"inventoryBatches": True}
+        )
+        
+        # Filter in Python if no group_filter to only show products with experiments
+        if not group_filter:
+            products = [p for p in products if p.experimentGroup is not None]
+        
+        return [
+            ProductWithExperiment(
+                id=p.id,
+                sku=p.sku,
+                name=p.name,
+                category=p.category or "Unknown",
+                base_price=float(p.basePrice),
+                experiment_group=p.experimentGroup,
+                experiment_assigned_at=p.experimentAssignedAt
+            )
+            for p in products
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to list experiments: {str(e)}"
+        )
+
+
 # Mock database functions (replace with actual Prisma calls in production)
 def get_mock_products() -> List[dict]:
     """Load products from synthetic data."""

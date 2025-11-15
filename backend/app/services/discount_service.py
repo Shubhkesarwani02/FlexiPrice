@@ -259,3 +259,58 @@ class DiscountService:
             ml_recommended=False,
             reason=reason
         )
+
+    @staticmethod
+    async def get_all_discounts(
+        limit: int = 100,
+        active_only: bool = True
+    ) -> List[BatchDiscountResponse]:
+        """
+        Get all batch discounts from the database.
+        
+        Args:
+            limit: Maximum number of discounts to return
+            active_only: If true, only return active discounts
+            
+        Returns:
+            List of BatchDiscountResponse objects
+        """
+        try:
+            where_clause = {}
+            
+            if active_only:
+                # Active means valid_from <= now and (valid_to is null or valid_to > now)
+                now = datetime.now()
+                where_clause = {
+                    "validFrom": {"lte": now},
+                    "OR": [
+                        {"validTo": None},
+                        {"validTo": {"gte": now}}
+                    ]
+                }
+            
+            discounts = await prisma.batchdiscount.find_many(
+                where=where_clause,
+                take=limit,
+                order={"createdAt": "desc"},
+                include={"batch": {"include": {"product": True}}}
+            )
+            
+            return [
+                BatchDiscountResponse(
+                    id=d.id,
+                    batchId=d.batchId,
+                    computedPrice=d.computedPrice,
+                    discountPct=d.discountPct,
+                    validFrom=d.validFrom,
+                    validTo=d.validTo,
+                    expiresAt=d.expiresAt,
+                    mlRecommended=d.mlRecommended,
+                    createdAt=d.createdAt,
+                )
+                for d in discounts
+            ]
+        except Exception as e:
+            logger.error(f"Failed to retrieve all discounts: {str(e)}")
+            raise
+

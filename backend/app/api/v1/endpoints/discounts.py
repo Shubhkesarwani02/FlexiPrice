@@ -11,6 +11,30 @@ from app.services.discount_service import DiscountService
 router = APIRouter()
 
 
+@router.get(
+    "",
+    response_model=List[BatchDiscountResponse],
+    summary="Get all active discounts",
+)
+async def get_all_discounts(
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of discounts to return"),
+    active_only: bool = Query(True, description="Return only active discounts"),
+):
+    """
+    Get all batch discounts in the system.
+    
+    - **limit**: Maximum number of discounts to return
+    - **active_only**: If true, returns only currently active discounts
+    """
+    try:
+        return await DiscountService.get_all_discounts(limit=limit, active_only=active_only)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve discounts: {str(e)}"
+        )
+
+
 @router.post(
     "/compute/{batch_id}",
     response_model=DiscountCalculationResponse,

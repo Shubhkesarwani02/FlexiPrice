@@ -43,7 +43,7 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const expectedToken = 'your-secret-admin-token-here'; // In production, use env variable
+    const expectedToken = process.env.NEXT_PUBLIC_ADMIN_TOKEN || 'admin123';
     
     if (token === expectedToken) {
       localStorage.setItem('adminToken', token);
@@ -256,7 +256,7 @@ export default function AdminPage() {
                           {product.category || '-'}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap">
-                          ${product.base_price.toFixed(2)}
+                          ${Number(product.base_price || product.basePrice || 0).toFixed(2)}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap">
                           <Link
@@ -324,8 +324,8 @@ export default function AdminPage() {
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap">
                           {discount.discount_type === 'percentage' 
-                            ? `${discount.value}%` 
-                            : `$${discount.value}`}
+                            ? `${Number(discount.value || 0)}%` 
+                            : `$${Number(discount.value || 0).toFixed(2)}`}
                         </td>
                         <td className="px-6 py-3 whitespace-nowrap">
                           {discount.priority}

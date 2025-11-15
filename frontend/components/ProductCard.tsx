@@ -6,9 +6,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const basePrice = product.base_price || product.basePrice;
-  const storefrontPrice = product.storefront_price;
-  const discountPct = product.discount_pct;
+  const basePrice = Number(product.base_price || product.basePrice);
+  const storefrontPrice = Number(product.storefront_price ?? basePrice);
+  const discountPct = product.discount_pct ? Number(product.discount_pct) : 0;
   const hasDiscount = discountPct && discountPct > 0;
   const savings = basePrice - storefrontPrice;
 
